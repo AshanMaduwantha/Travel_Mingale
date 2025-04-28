@@ -7,6 +7,8 @@ import ResetPassword from './pages/ResetPassword'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Profile from './pages/Profile'
+import Hotel from './pages/hotel/Hotel';
+import List from './pages/list/List';
 
 
 const App = () => {
@@ -21,6 +23,8 @@ const App = () => {
         <Route path='/profile' element={<Profile/>}/>
 
         /* Oshadhie routes */
+        <Route path='/hotels' element={<List />} />
+        <Route path='/hotels/:id' element={<Hotel />} />
         
       </Routes>
     </div>
