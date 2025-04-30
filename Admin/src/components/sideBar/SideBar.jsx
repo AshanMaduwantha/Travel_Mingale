@@ -15,7 +15,7 @@ const Sidebar = ({ onToggle }) => {
   // Define menu items to make code more maintainable
   const menuItems = [
     { path: "/admin", label: "Manage Hotels", icon: "🏨" },
-    { path: "/admin/room", label: "Manage Rooms", icon: "🛏️" },
+    { path: "/admin/bookings", label: "Manage Bookings", icon: "🛏️" },
     { path: "/admin/users", label: "Manage Users", icon: "👥" },
     { path: "/reviews", label: "Manage Reviews", icon: "⭐" },
   ];
