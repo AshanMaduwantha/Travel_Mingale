@@ -88,3 +88,13 @@ export const deleteUser = async (req, res) => {
         return res.status(500).json({ success: false, message: error.message });
     }
 };
+
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await userModel.find(); // fetch all users
+    res.json({ success: true, users });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

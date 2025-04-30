@@ -5,6 +5,7 @@ import AdminHome from './pages/home/AdminHome';
 import NewHotel from './pages/hotel/newHotel/NewHotel';
 import NewRoom from './pages/hotel/newHotel/NewHotel'
 import UpdateRoom from './pages/hotel/updateHotel/UpdateHotel'
+import UserManage from './pages/users/UserHome';
 
 
 
@@ -21,6 +22,7 @@ function App() {
           <Route path='/admin/edit-hotel' element={< UpdateRoom/>} />
           <Route path='/admin/add-room' element={<NewRoom />} />
           <Route path='/admin/edit-hotel' element={< UpdateRoom/>} />
+          <Route path='/usermanage' element={< UserManage/>} />
 
         </Routes>
       </Router>
