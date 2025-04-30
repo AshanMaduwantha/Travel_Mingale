@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import HotelTable from '../../components/hotelTable/HotelTable';
+import UserTable from './UserDashboard';
 import Sidebar from '../../components/sideBar/SideBar';
 
 function AdminHome() {
@@ -23,7 +23,7 @@ function AdminHome() {
         }`}
       >
         <div className="py-6">
-          <HotelTable />
+          <UserTable />
         </div>
       </div>
     </div>

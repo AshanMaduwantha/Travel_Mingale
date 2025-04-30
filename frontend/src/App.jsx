@@ -1,6 +1,6 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
-import Home from './pages/Home'
+import Home from './pages/home/Home'
 import Login from './pages/Login'
 import EmailVerify from './pages/EmailVerify'
 import ResetPassword from './pages/ResetPassword'
@@ -9,8 +9,6 @@ import 'react-toastify/dist/ReactToastify.css'
 
 import Profile from './pages/UserProfile'
 
-
-import Profile from './pages/Profile'
 import Hotel from './pages/hotel/Hotel';
 import List from './pages/list/List';
 

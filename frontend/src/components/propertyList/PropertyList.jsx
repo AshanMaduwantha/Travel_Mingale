@@ -9,7 +9,7 @@ import house from './image/house.jpg';
 import cottage from './image/cottage.jpg';
 
 function PropertyList() {
-  const { data, loading, error } = useFetch("http://localhost:8070/api/hotels/countByType");
+  const { data, loading, error } = useFetch("http://localhost:4000/api/hotels/countByType");
 
   console.log("Fetched property types:", data);
 

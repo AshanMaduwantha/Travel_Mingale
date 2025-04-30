@@ -65,9 +65,7 @@ const Header = ({ type }) => {
           <>
             <h1 className="text-3xl font-bold">A lifetime of discounts? It's Genius.</h1>
             <p className="my-5 text-lg">Get rewarded for your travels – unlock instant savings of 10% or more with a free Travel Mingle account</p>
-            <button className="bg-[#0071c2] text-white font-medium py-2 px-4 rounded-md cursor-pointer">
-              Sign in / Register
-            </button>
+
 
             <div className="absolute bottom-[-25px] w-full max-w-4xl flex items-center justify-around bg-white border-3 border-[#febb02] py-2 px-4 rounded-md">
               <div className="flex items-center gap-2">

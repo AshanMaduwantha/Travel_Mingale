@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import Navbar from '../../components/navbar/Navbar'
 import Header from '../../components/header/Header'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleArrowLeft, faCircleArrowRight, faCircleXmark, faLocationDot } from "@fortawesome/free-solid-svg-icons";
@@ -19,7 +18,7 @@ const Hotel = () => {
   const [open, setOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
 
-  const { data, loading, error } = useFetch(`http://localhost:8070/api/hotels/find/${id}`);
+  const { data, loading, error } = useFetch(`http://localhost:4000/api/hotels/find/${id}`);
 
   const { dates, options } = useContext(SearchContext);
 
@@ -59,7 +58,7 @@ const Hotel = () => {
 
   return (
     <div>
-      <Navbar />
+
       <Header type="list" />
       {loading ? (
         "loading"
