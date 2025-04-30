@@ -6,9 +6,14 @@ import EmailVerify from './pages/EmailVerify'
 import ResetPassword from './pages/ResetPassword'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+
+import Profile from './pages/UserProfile'
+
+
 import Profile from './pages/Profile'
 import Hotel from './pages/hotel/Hotel';
 import List from './pages/list/List';
+
 
 
 const App = () => {
