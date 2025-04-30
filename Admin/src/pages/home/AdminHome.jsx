@@ -1,15 +1,33 @@
-import React from 'react'
-import HotelTable from '../../components/hotelTable/HotelTable'
-import Sidebar from '../../components/sideBar/SideBar'
-
+import React, { useState } from 'react';
+import HotelTable from '../../components/hotelTable/HotelTable';
+import Sidebar from '../../components/sideBar/SideBar';
 
 function AdminHome() {
+  // Track sidebar collapsed state
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Handle sidebar toggle
+  const handleSidebarToggle = (collapsed) => {
+    setSidebarCollapsed(collapsed);
+  };
+
   return (
-    <div>
-      <Sidebar />
-      <HotelTable />
+    <div className="flex h-screen bg-gray-100">
+      {/* Pass the toggle handler to Sidebar */}
+      <Sidebar onToggle={handleSidebarToggle} />
+      
+      {/* Main content area with dynamic margin based on sidebar state */}
+      <div 
+        className={`flex-1 overflow-auto transition-all duration-300 ${
+          sidebarCollapsed ? 'ml-16' : 'ml-64'
+        }`}
+      >
+        <div className="py-6">
+          <HotelTable />
+        </div>
+      </div>
     </div>
-  )
+  );
 }
 
-export default AdminHome
+export default AdminHome;

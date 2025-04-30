@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Header from '../../components/header/Header';
-import Navbar from '../../components/navbar/Navbar';
 import { useLocation } from "react-router-dom";
 import { format } from "date-fns";
 import { DateRange } from "react-date-range";
@@ -24,7 +23,7 @@ const List = () => {
 
   // Fetch data only when the button is clicked
   const { data, loading, error, reFetch } = useFetch(
-    `http://localhost:8070/api/hotels?city=${destination}&min=${searchMin}&max=${searchMax}`
+    `http://localhost:4000/api/hotels?city=${destination}&min=${searchMin}&max=${searchMax}`
   );
 
   const handleClick = () => {
@@ -35,7 +34,6 @@ const List = () => {
 
   return (
     <div>
-      <Navbar />
       <Header type="list" />
       <div className="flex justify-center mt-5">
         <div className="w-full max-w-5xl flex gap-5">

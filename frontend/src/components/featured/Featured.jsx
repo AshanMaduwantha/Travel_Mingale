@@ -15,7 +15,7 @@ import useFetch from "../../hooks/useFetch";
 
 const Featured = () => {
   const { data, loading, error } = useFetch(
-    "http://localhost:8070/api/hotels/countByCity?cities=colombo,kandy,galle,negombo,ella,nuwaraeliya,anuradhapura,trincomalee,mirissa,polonnaruwa,kalpitiya,jaffna"
+    "http://localhost:4000/api/hotels/countByCity?cities=colombo,kandy,galle,negombo,ella,nuwaraeliya,anuradhapura,trincomalee,mirissa,polonnaruwa,kalpitiya,jaffna"
   );
 
   const places = [

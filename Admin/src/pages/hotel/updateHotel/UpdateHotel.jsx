@@ -53,7 +53,7 @@ const UpdateHotel = () => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await fetch(`http://localhost:8070/api/hotels/${hotel._id}`, {
+      const response = await fetch(`http://localhost:4000/api/hotels/${hotel._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
