@@ -6,7 +6,9 @@ import EmailVerify from './pages/EmailVerify'
 import ResetPassword from './pages/ResetPassword'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import Profile from './pages/Profile'
+import Profile from './pages/UserProfile'
+
+
 
 const App = () => {
   return (

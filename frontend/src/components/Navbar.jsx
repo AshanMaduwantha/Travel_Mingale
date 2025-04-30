@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import Profile from '../pages/Profile';
+
 
 function Navbar() {
   const navigate = useNavigate();

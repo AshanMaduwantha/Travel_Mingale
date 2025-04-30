@@ -62,7 +62,8 @@ const userSchema = new mongoose.Schema({
   address: {
     type: String,
     default: ''
-  }
+  },
+ 
 });
 
 const userModel = mongoose.models.user || mongoose.model('user', userSchema);
