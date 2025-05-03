@@ -1,43 +1,55 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Search, AlertCircle, Check, Calendar, Clock, Hotel, DollarSign, RefreshCw, UserCheck, UserX, Filter } from "lucide-react";
+import {
+  Search,
+  AlertCircle,
+  Check,
+  Calendar,
+  Clock,
+  Hotel,
+  DollarSign,
+  RefreshCw,
+  UserCheck,
+  UserX,
+  Filter,
+} from "lucide-react";
 
 const AdminDashboard = () => {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [notification, setNotification] = useState({ show: false, message: "", type: "" });
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     confirmed: 0,
     pending: 0,
-    cancelled: 0
+    cancelled: 0,
   });
 
-  // Fetch reservations from backend on component mount
   useEffect(() => {
     fetchReservations();
-    const intervalId = setInterval(fetchReservations, 3000);
-    return () => clearInterval(intervalId);
   }, []);
 
   const fetchReservations = async () => {
     setLoading(true);
     try {
       const response = await axios.get("http://localhost:4000/api/reservations");
-      setReservations(response.data);
-      
-      // Calculate stats
       const data = response.data;
+      setReservations(data);
+
       setStats({
         total: data.length,
-        confirmed: data.filter(r => r.status === "confirmed").length,
-        pending: data.filter(r => r.status === "pending").length,
-        cancelled: data.filter(r => r.status === "cancelled").length
+        confirmed: data.filter((r) => r.status === "confirmed").length,
+        pending: data.filter((r) => r.status === "pending").length,
+        cancelled: data.filter((r) => r.status === "cancelled").length,
       });
-      
+
       showNotification("Reservations loaded successfully", "success");
     } catch (err) {
       console.error("Failed to fetch reservations:", err);
@@ -46,14 +58,13 @@ const AdminDashboard = () => {
       setLoading(false);
     }
   };
-  
+
   const handleRefresh = async () => {
     setRefreshing(true);
     await fetchReservations();
     setTimeout(() => setRefreshing(false), 500);
   };
 
-  // Show notification
   const showNotification = (message, type) => {
     setNotification({ show: true, message, type });
     setTimeout(() => {
@@ -61,17 +72,16 @@ const AdminDashboard = () => {
     }, 3000);
   };
 
-  // Handle status change
   const handleStatusChange = async (id, newStatus) => {
     try {
       const res = await axios.put(`http://localhost:4000/api/reservations/${id}`, {
-        status: newStatus
+        status: newStatus,
       });
-      
-      setReservations(prev =>
-        prev.map(r => (r._id === id ? { ...r, status: res.data.status } : r))
+
+      setReservations((prev) =>
+        prev.map((r) => (r._id === id ? { ...r, status: res.data.status } : r))
       );
-      
+
       showNotification("Status updated successfully", "success");
     } catch (err) {
       console.error("Update failed:", err);
@@ -79,21 +89,17 @@ const AdminDashboard = () => {
     }
   };
 
-  // Filter reservations based on search term and status filter
-  const filteredReservations = reservations.filter(
-    (res) => {
-      const matchesSearch = 
-        res.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        res.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        res.roomType?.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesStatus = statusFilter === "all" || res.status === statusFilter;
-      
-      return matchesSearch && matchesStatus;
-    }
-  );
+  const filteredReservations = reservations.filter((res) => {
+    const matchesSearch =
+      res.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      res.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      res.roomType?.toLowerCase().includes(searchTerm.toLowerCase());
 
-  // Status styling
+    const matchesStatus = statusFilter === "all" || res.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
   const getStatusClass = (status) => {
     switch (status) {
       case "confirmed":
@@ -107,11 +113,12 @@ const AdminDashboard = () => {
 
   return (
     <div className="w-full px-6 py-8">
-      {/* Notification */}
       {notification.show && (
         <div
           className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center ${
-            notification.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+            notification.type === "success"
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
           }`}
         >
           {notification.type === "success" ? (
@@ -123,7 +130,6 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Header section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Reservation Management</h2>
@@ -153,7 +159,7 @@ const AdminDashboard = () => {
             </select>
             <Filter className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
           </div>
-          <button 
+          <button
             onClick={handleRefresh}
             className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors flex items-center justify-center"
           >
@@ -162,7 +168,7 @@ const AdminDashboard = () => {
           </button>
         </div>
       </div>
-      
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
@@ -176,7 +182,6 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
-        
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
@@ -188,7 +193,6 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
-        
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
@@ -200,7 +204,6 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
-        
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
@@ -303,8 +306,10 @@ const AdminDashboard = () => {
                           <option value="cancelled">Cancelled</option>
                         </select>
                         <button
-                          onClick={() => window.confirm(`Send confirmation email to ${reservation.name}?`) && 
-                            showNotification("Email sent to " + reservation.email, "success")}
+                          onClick={() =>
+                            window.confirm(`Send confirmation email to ${reservation.name}?`) &&
+                            showNotification("Email sent to " + reservation.email, "success")
+                          }
                           className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors"
                           title="Email Guest"
                         >
@@ -320,7 +325,6 @@ const AdminDashboard = () => {
         )}
       </div>
 
-      {/* Pagination and export controls */}
       <div className="mt-5 flex flex-col sm:flex-row items-center justify-between">
         <div className="text-sm text-gray-500 mb-4 sm:mb-0">
           Showing <span className="font-medium">{filteredReservations.length}</span> of{" "}
@@ -336,13 +340,13 @@ const AdminDashboard = () => {
             </button>
           </div>
           <div className="flex space-x-2">
-            <button 
+            <button
               onClick={() => showNotification("Report downloaded successfully", "success")}
               className="px-4 py-1 bg-green-50 text-green-600 rounded-lg border border-green-200 hover:bg-green-100 transition-colors flex items-center justify-center"
             >
               <span>Export Excel</span>
             </button>
-            <button 
+            <button
               onClick={() => showNotification("PDF generated successfully", "success")}
               className="px-4 py-1 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors flex items-center justify-center"
             >
