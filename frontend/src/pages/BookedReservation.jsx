@@ -3,6 +3,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
 import ReactModal from 'react-modal'; 
 
+
 ReactModal.setAppElement('#root'); 
 
 const BookedReservations = () => {
