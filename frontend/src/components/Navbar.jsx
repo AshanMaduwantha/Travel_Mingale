@@ -57,6 +57,9 @@ function Navbar() {
             <li onClick={() => navigate('/profile')} className='py-1 px-2 hover:bg-gray-200 cursor-pointer'>
                   My Profile
                 </li>
+                <li onClick={() => navigate('/BReservation')} className='py-1 px-2 hover:bg-gray-200 cursor-pointer'>
+                  Booking History
+                </li>
               {!userData.isAccountVerified && (
                 <li onClick={sendVerificationOtp} className='py-1 px-2 hover:bg-gray-200 cursor-pointer'>
                   Verify email

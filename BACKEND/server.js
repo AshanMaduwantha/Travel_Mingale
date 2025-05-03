@@ -9,6 +9,8 @@ import authRouter from './routes/authRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import hotelsRouter from "./routes/hotels.js";
 
+import reservationRoutes from './routes/reservationRoutes.js';
+
 const app = express();
 const port = process.env.PORT || 4000;
 connectDB();
@@ -27,6 +29,9 @@ app.use('/api/user', userRouter);
 
 //Oshadhie 
 app.use("/api/hotels", hotelsRouter);
+
+//kavindu
+app.use('/api/reservations', reservationRoutes);
 
 
 app.listen(port, ()=> console.log(`Server is running on port ${port}`));    
