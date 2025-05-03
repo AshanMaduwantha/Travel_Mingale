@@ -19,7 +19,8 @@ const AdminDashboard = () => {
   // Fetch reservations from backend on component mount
   useEffect(() => {
     fetchReservations();
-    // No auto-refresh interval - rely on manual refresh button instead
+    const intervalId = setInterval(fetchReservations, 3000);
+    return () => clearInterval(intervalId);
   }, []);
 
   const fetchReservations = async () => {
