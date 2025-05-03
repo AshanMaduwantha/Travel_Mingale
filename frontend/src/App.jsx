@@ -14,6 +14,13 @@ import List from './pages/list/List';
 
 
 
+import ReservationPage from './pages/ReservationPage';
+import BookedReservations from './pages/BookedReservation';
+
+
+
+
+
 const App = () => {
   return (
     <div>
@@ -28,6 +35,12 @@ const App = () => {
         /* Oshadhie routes */
         <Route path='/hotels' element={<List />} />
         <Route path='/hotels/:id' element={<Hotel />} />
+
+
+        {/*  Kavindu */ }
+        <Route path="/reservation" element={<ReservationPage />} />
+        <Route path="/BReservation" element={<BookedReservations />} />
+       
         
       </Routes>
     </div>
