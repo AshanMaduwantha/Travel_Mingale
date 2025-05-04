@@ -7,6 +7,10 @@ import NewRoom from './pages/hotel/newHotel/NewHotel'
 import UpdateRoom from './pages/hotel/updateHotel/UpdateHotel'
 import UserManage from './pages/users/UserHome';
 import AdminDashboard from './pages/reservation/reshome';
+
+import AdminReview from "./pages/review/adminReview"
+import ReviewPerformance from "./pages/review/reshome"
+
 import { ToastContainer } from 'react-toastify'
 
 
@@ -28,6 +32,9 @@ function App() {
           <Route path='/admin/edit-hotel' element={< UpdateRoom/>} />
           <Route path='/usermanage' element={< UserManage/>} />
           <Route path="/adminDashboard" element={<AdminDashboard />} />
+
+          <Route path="/adminreview" element={<AdminReview />} />
+          <Route path="/reviewPerformance" element={<ReviewPerformance />} />
 
         </Routes>
       </Router>

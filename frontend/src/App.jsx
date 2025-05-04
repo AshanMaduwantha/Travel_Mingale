@@ -20,6 +20,13 @@ import BookedReservations from './pages/BookedReservation';
 
 
 
+import ReviewForm from "./pages/reviewForm"
+import AdminReview from "./pages/adminReview"
+import ReviewPerformance from "./pages/reviewPerformance"
+
+
+
+
 
 const App = () => {
   return (
@@ -40,6 +47,17 @@ const App = () => {
         {/*  Kavindu */ }
         <Route path="/reservation" element={<ReservationPage />} />
         <Route path="/BReservation" element={<BookedReservations />} />
+
+
+
+        {/* pamuditha */}
+        <Route path="/reviewForm" element={<ReviewForm />} />
+        <Route path="/adminreview" element={<AdminReview />} />
+        <Route path="/reviewPerformance" element={<ReviewPerformance />} />
+
+
+
+        
        
         
       </Routes>
