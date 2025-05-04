@@ -17,7 +17,7 @@ const Sidebar = ({ onToggle }) => {
     { path: "/admin", label: "Manage Hotels", icon: "🏨" },
     { path: "/adminDashboard", label: "Manage Bookings", icon: "🛏️" },
     { path: "/usermanage", label: "Manage Users", icon: "👥" },
-    { path: "/reviews", label: "Manage Reviews", icon: "⭐" },
+    { path: "/reviewPerformance", label: "Manage Reviews", icon: "⭐" },
   ];
 
   // Check if current path matches menu item path
