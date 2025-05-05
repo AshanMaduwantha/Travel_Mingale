@@ -11,6 +11,12 @@ import hotelsRouter from "./routes/hotels.js";
 
 import reservationRoutes from './routes/reservationRoutes.js';
 
+
+
+import reviewRoutes from './routes/reviewRoutes.js';
+
+
+
 const app = express();
 const port = process.env.PORT || 4000;
 connectDB();
@@ -32,6 +38,10 @@ app.use("/api/hotels", hotelsRouter);
 
 //kavindu
 app.use('/api/reservations', reservationRoutes);
+
+
+//pamuditha
+app.use("/api/reviews", reviewRoutes);
 
 
 app.listen(port, ()=> console.log(`Server is running on port ${port}`));    

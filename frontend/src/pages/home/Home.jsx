@@ -23,11 +23,8 @@ function Home() {
         {/* Main content */}
         <div className="mt-12 flex flex-col items-center gap-8">
           <Featured />
-          <h1 className="text-2xl font-semibold">Browse by property type</h1>
           <PropertyList />
-          <h1 className="text-2xl font-semibold">Homes guests love</h1>
           <FeaturedProperties />
-          <MailList />
           <Footer />
         </div>
       </div>
