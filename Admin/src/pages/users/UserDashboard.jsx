@@ -520,13 +520,7 @@ const UserDashboard = () => {
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </button>
-          <button 
-            onClick={() => alert("Add user functionality to be implemented")}
-            className="px-4 py-2 bg-white text-blue-600 hover:bg-blue-50 rounded-lg shadow flex items-center justify-center"
-          >
-            <UserPlus className="h-4 w-4 mr-2" />
-            Add User
-          </button>
+          
           <div className="relative inline-block">
             <button 
               onClick={() => document.getElementById("exportDropdown").classList.toggle("hidden")}
