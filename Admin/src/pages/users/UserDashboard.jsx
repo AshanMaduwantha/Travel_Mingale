@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { 
   Search, AlertCircle, Check, Trash2, UserCheck, UserX, 
-  Filter, ChevronDown, ChevronUp, Edit, Download, RefreshCw, UserPlus
+  Filter, ChevronDown, ChevronUp, Edit, Download, RefreshCw, UserPlus, FileText
 } from "lucide-react";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const UserDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -24,6 +26,7 @@ const UserDashboard = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
+  const [pdfExportLoading, setPdfExportLoading] = useState(false);
 
   // Fetch users from backend on component mount
   useEffect(() => {
@@ -196,6 +199,136 @@ const UserDashboard = () => {
     document.body.removeChild(link);
   };
 
+  // Generate and download PDF for single user
+  const handleExportUserPDF = async (user, e) => {
+    if (e) e.stopPropagation();
+    setPdfExportLoading(true);
+    try {
+      // Create PDF document
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(20);
+      doc.text("User Details", 105, 15, { align: "center" });
+      
+      // Add user info
+      doc.setFontSize(12);
+      doc.setTextColor(100);
+      
+      // Add company logo/header
+      doc.setFillColor(66, 133, 244);
+      doc.rect(0, 0, 210, 8, "F");
+      
+      const userData = [
+        ["Name:", user.name || "N/A"],
+        ["Email:", user.email || "N/A"],
+        ["Phone:", user.phone || "N/A"],
+        ["Gender:", user.gender || "Not specified"],
+        ["Address:", user.address || "N/A"],
+        ["Birthday:", user.birthday || "N/A"],
+        ["Account Status:", user.isAccountVerified ? "Verified" : "Not Verified"]
+      ];
+      
+      // Add content using autoTable
+      autoTable(doc, {
+        startY: 30,
+        head: [["Field", "Value"]],
+        body: userData,
+        theme: "grid",
+        headStyles: { fillColor: [66, 133, 244], textColor: 255 },
+        alternateRowStyles: { fillColor: [240, 240, 240] }
+      });
+      
+      // Add footer
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        doc.text(
+          `Generated on ${new Date().toLocaleDateString()} | Page ${i} of ${pageCount}`,
+          105,
+          doc.internal.pageSize.height - 10,
+          { align: "center" }
+        );
+      }
+      
+      // Save PDF
+      doc.save(`${user.name || "user"}_details.pdf`);
+      showNotification("PDF exported successfully", "success");
+    } catch (err) {
+      console.error("PDF Export failed:", err);
+      showNotification("Failed to export PDF", "error");
+    } finally {
+      setPdfExportLoading(false);
+    }
+  };
+
+  // Generate and download PDF for all filtered users
+  const handleExportAllPDF = async () => {
+    setPdfExportLoading(true);
+    try {
+      // Create PDF document
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(20);
+      doc.text("User Management Report", 105, 15, { align: "center" });
+      
+      // Add date
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 105, 22, { align: "center" });
+      
+      // Add header
+      doc.setFillColor(66, 133, 244);
+      doc.rect(0, 0, 210, 8, "F");
+      
+      // Transform data for table
+      const tableData = filteredUsers.map(user => [
+        user.name || "N/A",
+        user.email || "N/A",
+        user.phone || "N/A",
+        user.gender || "Not specified",
+        user.isAccountVerified ? "Verified" : "Not Verified"
+      ]);
+      
+      // Add table using autoTable
+      autoTable(doc, {
+        startY: 30,
+        head: [["Name", "Email", "Phone", "Gender", "Status"]],
+        body: tableData,
+        theme: "grid",
+        headStyles: { fillColor: [66, 133, 244], textColor: 255 },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        margin: { top: 30 }
+      });
+      
+      // Add footer with page numbers
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        doc.text(
+          `User Report | Page ${i} of ${pageCount}`,
+          105,
+          doc.internal.pageSize.height - 10,
+          { align: "center" }
+        );
+      }
+      
+      // Save PDF
+      doc.save("users_report.pdf");
+      showNotification("PDF exported successfully", "success");
+    } catch (err) {
+      console.error("PDF Export failed:", err);
+      showNotification("Failed to export PDF", "error");
+    } finally {
+      setPdfExportLoading(false);
+    }
+  };
+
   return (
     <div className="w-full px-6 py-8 bg-gray-50 min-h-screen">
       {/* Notification */}
@@ -273,6 +406,18 @@ const UserDashboard = () => {
               </div>
               <div className="mt-8 flex justify-end gap-3">
                 <button 
+                  className="px-4 py-2 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg font-medium flex items-center"
+                  onClick={(e) => handleExportUserPDF(selectedUser, e)}
+                  disabled={pdfExportLoading}
+                >
+                  {pdfExportLoading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600 mr-2"></div>
+                  ) : (
+                    <FileText className="h-4 w-4 mr-2" />
+                  )}
+                  Export PDF
+                </button>
+                <button 
                   className="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium flex items-center"
                   onClick={() => alert("Edit functionality to be implemented")}
                 >
@@ -313,18 +458,48 @@ const UserDashboard = () => {
             <UserPlus className="h-4 w-4 mr-2" />
             Add User
           </button>
-          <button 
-            onClick={handleExportData}
-            disabled={exportLoading}
-            className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg shadow flex items-center justify-center disabled:opacity-50"
-          >
-            {exportLoading ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-            ) : (
+          <div className="relative inline-block">
+            <button 
+              onClick={() => document.getElementById("exportDropdown").classList.toggle("hidden")}
+              className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg shadow flex items-center justify-center"
+            >
               <Download className="h-4 w-4 mr-2" />
-            )}
-            Export
-          </button>
+              Export
+              <ChevronDown className="h-4 w-4 ml-2" />
+            </button>
+            <div id="exportDropdown" className="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10">
+              <ul className="py-1">
+                <li>
+                  <button
+                    onClick={handleExportData}
+                    disabled={exportLoading}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center text-gray-700"
+                  >
+                    {exportLoading ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                    ) : (
+                      <Download className="h-4 w-4 mr-2" />
+                    )}
+                    Export as CSV
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={handleExportAllPDF}
+                    disabled={pdfExportLoading}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center text-gray-700"
+                  >
+                    {pdfExportLoading ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                    ) : (
+                      <FileText className="h-4 w-4 mr-2" />
+                    )}
+                    Export as PDF
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -517,7 +692,14 @@ const UserDashboard = () => {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex space-x-3">
+                      <div className="flex space-x-2">
+                        <button
+                          className="text-green-600 hover:bg-green-50 p-2 rounded-full transition-colors"
+                          onClick={(e) => handleExportUserPDF(user, e)}
+                          title="Export PDF"
+                        >
+                          <FileText className="h-5 w-5" />
+                        </button>
                         <button
                           className="text-blue-600 hover:bg-blue-50 p-2 rounded-full transition-colors"
                           onClick={(e) => {
