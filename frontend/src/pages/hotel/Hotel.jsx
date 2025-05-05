@@ -201,45 +201,92 @@ const Hotel = () => {
           </div>
         </div>
         
-        {/* Photo gallery */}
-        <div className="mb-10">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Hotel Gallery</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {data.photos?.length > 0 ? (
-              data.photos.slice(0, 6).map((photo, i) => (
-                <div 
-                  key={i} 
-                  className="relative overflow-hidden rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 aspect-w-16 aspect-h-9 group"
-                  style={{ height: "220px" }}
-                >
-                  <img
-                    src={photo || fallback}
-                    alt={`Hotel view ${i + 1}`}
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
-                    onClick={() => handleOpen(i)}
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity duration-300 flex items-center justify-center">
-                    <span className="text-white opacity-0 group-hover:opacity-100 transition duration-300 text-sm font-medium">
-                      View larger
-                    </span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="col-span-3 bg-gray-100 rounded-lg p-8 text-center">
-                <p className="text-gray-500">No images available for this property</p>
-              </div>
+        {/* Modern Photo Gallery */}
+        <div className="mb-12">
+          <div className="flex justify-between items-center mb-5">
+            <h2 className="text-2xl font-bold text-gray-800">Hotel Gallery</h2>
+            {data.photos?.length > 6 && (
+              <button 
+                onClick={() => handleOpen(6)}
+                className="flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm bg-blue-50 px-4 py-2 rounded-full transition duration-200"
+              >
+                View all {data.photos.length} photos
+                <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
+              </button>
             )}
           </div>
           
-          {data.photos?.length > 6 && (
-            <button 
-              onClick={() => handleOpen(6)}
-              className="mt-4 text-blue-600 hover:text-blue-800 font-medium flex items-center"
-            >
-              View all {data.photos.length} photos
-              <FontAwesomeIcon icon={faArrowRight} className="ml-1 text-sm" />
-            </button>
+          {data.photos?.length > 0 ? (
+            <div className="grid grid-cols-12 gap-3">
+              {/* Main featured image */}
+              <div 
+                className="col-span-12 md:col-span-6 relative rounded-xl overflow-hidden cursor-pointer shadow-md hover:shadow-lg transition duration-300 h-96"
+                onClick={() => handleOpen(0)}
+              >
+                <img
+                  src={data.photos[0] || fallback}
+                  alt="Featured hotel view"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition duration-300 flex items-end justify-start p-6">
+                  <div className="text-white font-medium flex items-center">
+                    <FontAwesomeIcon icon={faLocationDot} className="mr-2" />
+                    <span>{data.name}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Grid of smaller images */}
+              <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-3 h-96">
+                {data.photos.slice(1, 5).map((photo, i) => (
+                  <div 
+                    key={i} 
+                    className="relative rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition duration-300 group"
+                    onClick={() => handleOpen(i + 1)}
+                  >
+                    <img
+                      src={photo || fallback}
+                      alt={`Hotel view ${i + 2}`}
+                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition duration-300">
+                      <div className="p-2 bg-white/80 rounded-full">
+                        <FontAwesomeIcon icon={faCircleArrowRight} className="text-blue-600 text-lg" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="bg-gray-100 rounded-xl p-10 text-center">
+              <div className="mx-auto w-16 h-16 mb-4 bg-gray-200 rounded-full flex items-center justify-center">
+                <FontAwesomeIcon icon={faCircleXmark} className="text-gray-400 text-2xl" />
+              </div>
+              <p className="text-gray-500 text-lg">No images available for this property</p>
+              <p className="text-gray-400 text-sm mt-2">Check back later for updated photos</p>
+            </div>
+          )}
+          
+          {/* Image tags/categories */}
+          {data.photos?.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition duration-200">
+                All Photos
+              </button>
+              <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition duration-200">
+                Rooms
+              </button>
+              <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition duration-200">
+                Exterior
+              </button>
+              <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition duration-200">
+                Dining
+              </button>
+              <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition duration-200">
+                Amenities
+              </button>
+            </div>
           )}
         </div>
 
