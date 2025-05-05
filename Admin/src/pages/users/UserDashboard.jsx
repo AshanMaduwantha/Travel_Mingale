@@ -28,7 +28,6 @@ const UserDashboard = () => {
   const [exportLoading, setExportLoading] = useState(false);
   const [pdfExportLoading, setPdfExportLoading] = useState(false);
 
-  // Fetch users from backend on component mount
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -54,7 +53,6 @@ const UserDashboard = () => {
     }
   };
 
-  // Show notification
   const showNotification = (message, type) => {
     setNotification({ show: true, message, type });
     setTimeout(() => {
@@ -62,7 +60,6 @@ const UserDashboard = () => {
     }, 3000);
   };
 
-  // Delete user by ID
   const handleDelete = async (userId, name, e) => {
     e.stopPropagation();
     if (window.confirm(`Are you sure you want to delete user ${name}?`)) {
@@ -80,7 +77,6 @@ const UserDashboard = () => {
     }
   };
 
-  // Handle sorting
   const requestSort = (key) => {
     let direction = "ascending";
     if (sortConfig.key === key && sortConfig.direction === "ascending") {
@@ -89,7 +85,6 @@ const UserDashboard = () => {
     setSortConfig({ key, direction });
   };
 
-  // Apply sorting to users
   const sortedUsers = [...users].sort((a, b) => {
     if (!a[sortConfig.key] && !b[sortConfig.key]) return 0;
     if (!a[sortConfig.key]) return 1;
@@ -107,16 +102,13 @@ const UserDashboard = () => {
     return 0;
   });
 
-  // Apply filters and search
   const filteredUsers = sortedUsers.filter(
     (user) => {
-      // Search filter
       const matchesSearch = 
         user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.phone?.toLowerCase().includes(searchTerm.toLowerCase());
       
-      // Verification filters
       const matchesVerificationFilter = 
         (filterOptions.showVerifiedOnly && user.isAccountVerified) ||
         (filterOptions.showUnverifiedOnly && !user.isAccountVerified) ||
@@ -126,7 +118,6 @@ const UserDashboard = () => {
     }
   );
 
-  // Handle pagination
   const paginatedUsers = filteredUsers.slice(
     (pagination.currentPage - 1) * pagination.itemsPerPage,
     pagination.currentPage * pagination.itemsPerPage
@@ -158,9 +149,8 @@ const UserDashboard = () => {
   const handleExportData = async () => {
     setExportLoading(true);
     try {
-      // In a real app, you might want to call an API endpoint for this
       const csvContent = convertToCSV(filteredUsers);
-      downloadCSV(csvContent, 'users_export.csv');
+      downloadCSV(csvContent, 'travel_mingel_users_export.csv');
       showNotification("Data exported successfully", "success");
     } catch (err) {
       console.error("Export failed:", err);
@@ -171,14 +161,15 @@ const UserDashboard = () => {
   };
 
   const convertToCSV = (data) => {
-    const headers = ["Name", "Email", "Phone", "Address", "Gender", "Verified"];
+    const headers = ["Name", "Email", "Phone", "Address", "Gender", "Verified", "Join Date"];
     const rows = data.map(user => [
       user.name || "N/A",
       user.email || "N/A",
       user.phone || "N/A",
       user.address || "N/A",
       user.gender || "Not specified",
-      user.isAccountVerified ? "Yes" : "No"
+      user.isAccountVerified ? "Yes" : "No",
+      user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"
     ]);
     
     return [
@@ -199,26 +190,77 @@ const UserDashboard = () => {
     document.body.removeChild(link);
   };
 
-  // Generate and download PDF for single user
+  // Add Travel Mingel header to PDF
+  const addTravelMingelHeader = (doc) => {
+    // Main header with brand color
+    doc.setFillColor(30, 120, 180); // Travel Mingel blue
+    doc.rect(0, 0, doc.internal.pageSize.width, 20, 'F');
+    
+    // Logo text
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.setTextColor(255, 255, 255);
+    doc.text('Travel Mingel', 15, 13);
+    
+    // Tagline
+    doc.setFontSize(10);
+    doc.text('Connecting travelers worldwide', 15, 18);
+    
+    // Report title section
+    doc.setFillColor(240, 248, 255); // Light blue background
+    doc.rect(0, 20, doc.internal.pageSize.width, 15, 'F');
+    
+    return 35; // Return the Y position after header
+  };
+
+  // Add Travel Mingel footer to PDF
+  const addTravelMingelFooter = (doc) => {
+    const pageCount = doc.internal.getNumberOfPages();
+    
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      
+      // Footer line
+      doc.setDrawColor(30, 120, 180);
+      doc.setLineWidth(0.5);
+      doc.line(20, doc.internal.pageSize.height - 20, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 20);
+      
+      // Footer text
+      doc.setFontSize(9);
+      doc.setTextColor(100);
+      doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 15, { align: 'center' });
+      doc.text('© Travel Mingel - Confidential', doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+    }
+  };
+
+  // Generate and download PDF for single user with Travel Mingel branding
   const handleExportUserPDF = async (user, e) => {
     if (e) e.stopPropagation();
     setPdfExportLoading(true);
     try {
-      // Create PDF document
       const doc = new jsPDF();
       
-      // Add title
-      doc.setFontSize(20);
-      doc.text("User Details", 105, 15, { align: "center" });
+      // Add header and get starting Y position
+      const startY = addTravelMingelHeader(doc);
       
-      // Add user info
+      // Main title
+      doc.setFontSize(16);
+      doc.setTextColor(30, 120, 180);
+      doc.text('User Profile Details', 105, startY, { align: 'center' });
+      
+      // Subtitle
       doc.setFontSize(12);
       doc.setTextColor(100);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 105, startY + 7, { align: 'center' });
       
-      // Add company logo/header
-      doc.setFillColor(66, 133, 244);
-      doc.rect(0, 0, 210, 8, "F");
+      // User avatar section
+      doc.setFillColor(240, 248, 255);
+      doc.roundedRect(20, startY + 15, 170, 20, 3, 3, 'F');
+      doc.setFontSize(14);
+      doc.setTextColor(30, 120, 180);
+      doc.text(`${user.name || 'User Profile'}`, 25, startY + 25);
       
+      // User details table
       const userData = [
         ["Name:", user.name || "N/A"],
         ["Email:", user.email || "N/A"],
@@ -226,35 +268,43 @@ const UserDashboard = () => {
         ["Gender:", user.gender || "Not specified"],
         ["Address:", user.address || "N/A"],
         ["Birthday:", user.birthday || "N/A"],
+        ["Member Since:", user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"],
         ["Account Status:", user.isAccountVerified ? "Verified" : "Not Verified"]
       ];
       
-      // Add content using autoTable
       autoTable(doc, {
-        startY: 30,
-        head: [["Field", "Value"]],
+        startY: startY + 40,
+        head: [["Field", "Details"]],
         body: userData,
         theme: "grid",
-        headStyles: { fillColor: [66, 133, 244], textColor: 255 },
-        alternateRowStyles: { fillColor: [240, 240, 240] }
+        headStyles: { 
+          fillColor: [30, 120, 180],
+          textColor: 255,
+          fontStyle: 'bold'
+        },
+        alternateRowStyles: { fillColor: [240, 248, 255] },
+        styles: { 
+          cellPadding: 5,
+          fontSize: 10,
+          valign: 'middle'
+        },
+        columnStyles: {
+          0: { fontStyle: 'bold', cellWidth: 40 }
+        },
+        margin: { top: 10 }
       });
       
+      // Additional notes section
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text('This document contains confidential user information for Travel Mingel internal use only.', 
+        14, doc.internal.pageSize.height - 30, { maxWidth: 180 });
+      
       // Add footer
-      const pageCount = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(10);
-        doc.setTextColor(150);
-        doc.text(
-          `Generated on ${new Date().toLocaleDateString()} | Page ${i} of ${pageCount}`,
-          105,
-          doc.internal.pageSize.height - 10,
-          { align: "center" }
-        );
-      }
+      addTravelMingelFooter(doc);
       
       // Save PDF
-      doc.save(`${user.name || "user"}_details.pdf`);
+      doc.save(`Travel_Mingel_User_${user.name || 'Profile'}.pdf`);
       showNotification("PDF exported successfully", "success");
     } catch (err) {
       console.error("PDF Export failed:", err);
@@ -264,62 +314,72 @@ const UserDashboard = () => {
     }
   };
 
-  // Generate and download PDF for all filtered users
+  // Generate and download PDF for all filtered users with Travel Mingel branding
   const handleExportAllPDF = async () => {
     setPdfExportLoading(true);
     try {
-      // Create PDF document
       const doc = new jsPDF();
       
-      // Add title
-      doc.setFontSize(20);
-      doc.text("User Management Report", 105, 15, { align: "center" });
+      // Add header and get starting Y position
+      const startY = addTravelMingelHeader(doc);
       
-      // Add date
-      doc.setFontSize(10);
+      // Main title
+      doc.setFontSize(16);
+      doc.setTextColor(30, 120, 180);
+      doc.text('User Management Report', 105, startY, { align: 'center' });
+      
+      // Subtitle
+      doc.setFontSize(12);
       doc.setTextColor(100);
-      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 105, 22, { align: "center" });
+      doc.text(`Generated on: ${new Date().toLocaleDateString()} | ${filteredUsers.length} users found`, 
+        105, startY + 7, { align: 'center' });
       
-      // Add header
-      doc.setFillColor(66, 133, 244);
-      doc.rect(0, 0, 210, 8, "F");
+      // Summary section
+      const verifiedCount = filteredUsers.filter(u => u.isAccountVerified).length;
+      doc.setFontSize(10);
+      doc.setTextColor(30, 120, 180);
+      doc.text('Summary:', 14, startY + 20);
+      doc.setTextColor(100);
+      doc.text(`• Total Users: ${filteredUsers.length}`, 20, startY + 25);
+      doc.text(`• Verified Users: ${verifiedCount} (${Math.round((verifiedCount/filteredUsers.length)*100)}%)`, 20, startY + 30);
+      doc.text(`• Unverified Users: ${filteredUsers.length - verifiedCount}`, 20, startY + 35);
       
-      // Transform data for table
+      // Users table
       const tableData = filteredUsers.map(user => [
         user.name || "N/A",
         user.email || "N/A",
         user.phone || "N/A",
         user.gender || "Not specified",
-        user.isAccountVerified ? "Verified" : "Not Verified"
+        user.isAccountVerified ? "Verified" : "Not Verified",
+        user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"
       ]);
       
-      // Add table using autoTable
       autoTable(doc, {
-        startY: 30,
-        head: [["Name", "Email", "Phone", "Gender", "Status"]],
+        startY: startY + 45,
+        head: [["Name", "Email", "Phone", "Gender", "Status", "Join Date"]],
         body: tableData,
         theme: "grid",
-        headStyles: { fillColor: [66, 133, 244], textColor: 255 },
-        alternateRowStyles: { fillColor: [240, 240, 240] },
-        margin: { top: 30 }
+        headStyles: { 
+          fillColor: [30, 120, 180],
+          textColor: 255,
+          fontStyle: 'bold'
+        },
+        alternateRowStyles: { fillColor: [240, 248, 255] },
+        styles: { 
+          cellPadding: 3,
+          fontSize: 9,
+          overflow: 'linebreak'
+        },
+        margin: { top: 10 },
+        pageBreak: 'auto',
+        tableWidth: 'wrap'
       });
       
-      // Add footer with page numbers
-      const pageCount = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(10);
-        doc.setTextColor(150);
-        doc.text(
-          `User Report | Page ${i} of ${pageCount}`,
-          105,
-          doc.internal.pageSize.height - 10,
-          { align: "center" }
-        );
-      }
+      // Add footer
+      addTravelMingelFooter(doc);
       
       // Save PDF
-      doc.save("users_report.pdf");
+      doc.save("Travel_Mingel_Users_Report.pdf");
       showNotification("PDF exported successfully", "success");
     } catch (err) {
       console.error("PDF Export failed:", err);
@@ -328,6 +388,9 @@ const UserDashboard = () => {
       setPdfExportLoading(false);
     }
   };
+
+  // The rest of your component code remains the same...
+  // [Previous JSX code remains unchanged]
 
   return (
     <div className="w-full px-6 py-8 bg-gray-50 min-h-screen">
@@ -391,6 +454,12 @@ const UserDashboard = () => {
                   <div>
                     <label className="block text-sm text-gray-500">Birthday</label>
                     <p className="font-medium">{selectedUser.birthday || "N/A"}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-500">Join Date</label>
+                    <p className="font-medium">
+                      {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : "N/A"}
+                    </p>
                   </div>
                   <div>
                     <label className="block text-sm text-gray-500">Account Status</label>
