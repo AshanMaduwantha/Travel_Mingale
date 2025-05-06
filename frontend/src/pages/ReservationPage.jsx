@@ -234,7 +234,7 @@ const ReservationPage = () => {
                     type="number"
                     name="roomPrice"
                     value={formData.roomPrice}
-                    onChange={handleChange}
+                    
                     required
                     className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
