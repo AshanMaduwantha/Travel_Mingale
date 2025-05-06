@@ -75,6 +75,7 @@ const Hotel = () => {
         state: {
           hotelName: data.name,
           totalPrice: totalPrice,
+          roomCount: options.room,
         }
       });
     } else {
