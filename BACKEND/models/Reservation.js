@@ -12,8 +12,8 @@ const reservationSchema = new mongoose.Schema({
     },
     checkIn: { type: Date, required: true },
     checkOut: { type: Date, required: true },
-    roomType: {
-        type: String,
+    roomCount: {
+        type: Number,
         required: true,
     },
     roomPrice: {
@@ -22,25 +22,30 @@ const reservationSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
+        required: true,
         validate: {
             validator: function(value) {
-                return /\+?\d{1,3}?\s?\(?\d+\)?\s?\d+\s?\d+/g.test(value); // Phone number validation
+                return /\+?\d{1,3}?\s?\(?\d+\)?\s?\d+\s?\d+/g.test(value);
             },
             message: 'Please provide a valid phone number.'
         },
     },
     message: {
         type: String,
-        maxlength: [500, 'Message cannot exceed 500 characters.'],  // Optional: Add max length validation
+        required: true,
+        maxlength: [500, 'Message cannot exceed 500 characters.'],
+    },
+    hotelName: {
+        type: String,
+        required: true, // ✅ required field
     },
     status: {
         type: String,
         enum: ['pending', 'confirmed', 'cancelled'],
-        default: 'pending', // Default status is 'pending'
+        default: 'pending',
     },
 }, { timestamps: true });
 
-// Indexing fields for faster queries
 reservationSchema.index({ email: 1, checkIn: 1, checkOut: 1 });
 
-export default mongoose.model('Reservation', reservationSchema);  // Use export default
+export default mongoose.model('Reservation', reservationSchema);

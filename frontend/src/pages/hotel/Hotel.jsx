@@ -68,14 +68,21 @@ const Hotel = () => {
   };
 
   const handleClick = () => {
-    // Assuming 'user' should be defined somewhere. Adding a placeholder check
     const user = true; // Replace with actual user check
     if (user) {
-      setOpenModal(true);
+      const totalPrice = days * data.price * options.room + Math.round(data.price * days * 0.05);
+      navigate("/reservation", {
+        state: {
+          hotelName: data.name,
+          totalPrice: totalPrice,
+          roomCount: options.room,
+        }
+      });
     } else {
       navigate("/login");
     }
   };
+  
 
   if (loading) {
     return (
