@@ -4,7 +4,13 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Calendar, Phone, Mail, Home, Users, MessageSquare, Send, RefreshCw } from "lucide-react";
 
+import { useLocation } from 'react-router-dom';
+
 const ReservationPage = () => {
+
+  const location = useLocation();
+  const { hotelName, totalPrice } = location.state || {};
+
   const today = new Date().toISOString().split("T")[0];
 
   const [formData, setFormData] = useState({
@@ -87,7 +93,7 @@ const ReservationPage = () => {
           {/* Left Sidebar - Hotel Image/Info */}
           <div className="bg-indigo-600 text-white p-8 md:w-1/3">
             <div className="h-full flex flex-col">
-              <h2 className="text-2xl font-bold mb-6">LuxStay Hotel</h2>
+              <h2 className="text-2xl font-bold mb-6">{hotelName}</h2>
               <div className="mb-8">
                 <div className="h-1 w-12 bg-white rounded mb-6"></div>
                 <p className="text-indigo-100 mb-4">Experience luxury like never before with our premium accommodations and world-class service.</p>
@@ -207,12 +213,12 @@ const ReservationPage = () => {
                 {/* Room Price Field */}
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-400">$</span>
+                    <span className="text-gray-400">Rs.</span>
                   </div>
                   <input
                     type="number"
                     name="roomPrice"
-                    value={formData.roomPrice}
+                    value={totalPrice}
                     onChange={handleChange}
                     required
                     className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
