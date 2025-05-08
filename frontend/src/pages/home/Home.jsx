@@ -6,6 +6,7 @@ import Header from '../../components/header/Header';
 import MailList from '../../components/mailList/MailList';
 import PropertyList from '../../components/propertyList/PropertyList';
 import Navbar from '../../components/Navbar';
+import FeaturedAdventures from '../../components/advenpack/package';
 
 function Home() {
   return (
@@ -25,6 +26,7 @@ function Home() {
           <Featured />
           <PropertyList />
           <FeaturedProperties />
+          <FeaturedAdventures />
           <Footer />
         </div>
       </div>
