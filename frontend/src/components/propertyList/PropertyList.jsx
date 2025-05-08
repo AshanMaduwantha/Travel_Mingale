@@ -6,8 +6,9 @@ import resort from './image/resort.jpg';
 import apartment from './image/apartment.jpg';
 import house from './image/house.jpg';
 import cottage from './image/cottage.jpg';
+import bungalow from './image/bungalow.jpg';
 import useFetch from '../../hooks/useFetch';
-import { motion } from 'framer-motion'; // Assuming framer-motion is installed
+import { motion } from 'framer-motion'; 
 
 function PropertyList() {
   const { data, loading, error } = useFetch("http://localhost:4000/api/hotels/countByType");
@@ -23,7 +24,8 @@ function PropertyList() {
     { type: "resorts", label: "Resorts", img: resort, icon: "🏝️" },
     { type: "apartments", label: "Apartments", img: apartment, icon: "🏢" },
     { type: "house", label: "Guest House", img: house, icon: "🏠" },
-    { type: "cottage", label: "Cottage", img: cottage, icon: "🌲" }
+    { type: "cottage", label: "Cottage", img: cottage, icon: "🌲" },
+    { type: "bungalow", label: "Bungalow", img: bungalow, icon: "🛖" }
   ];
 
   if (loading) {
