@@ -7,7 +7,7 @@ import { useLocation } from 'react-router-dom';
 
 const ReservationPage = () => {
   const location = useLocation();
-  const { hotelName, totalPrice, roomCount } = location.state || {};
+  const { hotelName, totalPrice, roomCount, city } = location.state || {};
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -21,6 +21,7 @@ const ReservationPage = () => {
     phone: '',
     message: '',
     hotelName: hotelName || '',
+    city: city || '',
   });
 
   const [errors, setErrors] = useState({});
@@ -62,6 +63,8 @@ const ReservationPage = () => {
       checkOut: formData.checkOut.split("T")[0],
       totalPrice: totalPrice
     };
+    console.log("Reservation Data:", reservationData);
+    
 
     try {
       await axios.post('http://localhost:4000/api/reservations/', reservationData);
@@ -84,6 +87,7 @@ const ReservationPage = () => {
       phone: '',
       message: '',
       hotelName: hotelName || '',
+      city: '',
     });
     setErrors({});
   };
