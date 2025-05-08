@@ -44,6 +44,10 @@ const reservationSchema = new mongoose.Schema({
         enum: ['pending', 'confirmed', 'cancelled'],
         default: 'pending',
     },
+    Location: {
+        type: String,
+        required: true, 
+    },
 }, { timestamps: true });
 
 reservationSchema.index({ email: 1, checkIn: 1, checkOut: 1 });
