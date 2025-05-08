@@ -108,7 +108,15 @@ const Header = ({ type }) => {
               )}
 
               <div className="flex items-center gap-2">
-                <FontAwesomeIcon icon={faPerson} className={options ? "text-black" : "text-gray-300"} />
+                <FontAwesomeIcon
+                  icon={faPerson}
+                  className={
+                    options.adult > 1 || options.children > 0 || options.room > 1
+                      ? "text-black"
+                      : "text-gray-300"
+                  }
+                />
+
                 <span
                   onClick={() => setOpenOptions(!openOptions)}
                   className={`cursor-pointer ${options.adult > 1 || options.children > 0 || options.room > 1
