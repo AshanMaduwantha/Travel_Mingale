@@ -71,6 +71,8 @@ const Hotel = () => {
 
   const handleClick = () => {
     const user = true; // Replace with actual user check
+
+    
     if (user) {
       const totalPrice = days * data.price * options.room + Math.round(data.price * days * 0.05);
       navigate("/reservation", {
@@ -78,6 +80,7 @@ const Hotel = () => {
           hotelName: data.name,
           totalPrice: totalPrice,
           roomCount: options.room,
+          city: data.city,
         }
       });
     } else {
