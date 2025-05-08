@@ -44,9 +44,9 @@ const reservationSchema = new mongoose.Schema({
         enum: ['pending', 'confirmed', 'cancelled'],
         default: 'pending',
     },
-    Location: {
+    city: {
         type: String,
-        required: true, 
+        required: false, 
     },
 }, { timestamps: true });
 
