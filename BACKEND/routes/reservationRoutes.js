@@ -6,9 +6,15 @@ const router = express.Router();
 // POST - Create a new reservation
 router.post("/", async (req, res) => {
     console.log("[POST] Creating reservation:", req.body);
-    const { name, email, checkIn, checkOut, roomType, roomPrice, phone, message } = req.body;
+    const {
+        name, email, checkIn, checkOut,
+        roomCount, roomPrice, phone, message,
+        hotelName // ✅ new field
+    } = req.body;
 
-    if (!name || !email || !checkIn || !checkOut || !roomType || !roomPrice || !phone || !message) {
+    // Validate required fields including hotelName
+    if (!name || !email || !checkIn || !checkOut ||
+        !roomCount || !roomPrice || !phone || !message || !hotelName) {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -41,7 +47,7 @@ router.post("/", async (req, res) => {
 // GET - Fetch all reservations
 router.get("/", async (req, res) => {
     try {
-        const reservations = await Reservation.find().sort({ createdAt: -1 }); // Optional: show latest first
+        const reservations = await Reservation.find().sort({ createdAt: -1 });
         res.status(200).json(reservations);
     } catch (error) {
         res.status(500).json({

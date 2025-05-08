@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
@@ -10,7 +10,8 @@ import {
   faStar,
   faCalendarDays,
   faUser,
-  faArrowRight
+  faArrowRight,
+  faCloudSun
 } from "@fortawesome/free-solid-svg-icons";
 
 import Header from '../../components/header/Header';
@@ -18,8 +19,9 @@ import MailList from '../../components/mailList/MailList';
 import Footer from '../../components/footer/Footer';
 import useFetch from "../../hooks/useFetch.jsx";
 import { SearchContext } from '../../context/SearchContext.jsx';
-
 import fallback from "./image/araliya.jpg";
+
+import WeatherApp from '../../components/weatherapp/WeatherApp.jsx';
 
 const Hotel = () => {
   const location = useLocation();
@@ -68,14 +70,21 @@ const Hotel = () => {
   };
 
   const handleClick = () => {
-    // Assuming 'user' should be defined somewhere. Adding a placeholder check
     const user = true; // Replace with actual user check
     if (user) {
-      setOpenModal(true);
+      const totalPrice = days * data.price * options.room + Math.round(data.price * days * 0.05);
+      navigate("/reservation", {
+        state: {
+          hotelName: data.name,
+          totalPrice: totalPrice,
+          roomCount: options.room,
+        }
+      });
     } else {
       navigate("/login");
     }
   };
+  
 
   if (loading) {
     return (
@@ -183,6 +192,34 @@ const Hotel = () => {
             <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
           </button>
         </div>
+
+        {/* Weather Component in the right side highlighted area */}
+        <div className="py-6">
+          <div className="max-w-7xl mx-auto px-6">
+            {/* Header */}
+            <div className="flex items-center mb-6">
+              <div className="p-3 rounded-full bg-gray-100">
+                <FontAwesomeIcon icon={faCloudSun} className="text-blue-600 text-2xl" />
+              </div>
+              <h2 className="ml-4 text-2xl font-semibold text-gray-800">Local Weather Forecast</h2>
+            </div>
+
+            {/* Weather Card */}
+            <div className="rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+              {/* Location Info */}
+              <div className="p-5 bg-blue-600 text-white">
+                <h3 className="text-lg font-semibold">Weather at {data.address}</h3>
+                <p className="text-sm text-blue-100">Accurate & current updates</p>
+              </div>
+
+              {/* Weather Component */}
+              <div className="p-6">
+                <WeatherApp initialCity={data.city || "Colombo"} />
+              </div>
+            </div>
+          </div>
+        </div>
+
 
         {/* Special offers banner */}
         <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-8 rounded-r-lg">
@@ -403,6 +440,8 @@ const Hotel = () => {
           </div>
         </div>
       </div>
+
+      
 
       <Footer />
       

@@ -3,8 +3,12 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Calendar, Phone, Mail, Home, Users, MessageSquare, Send, RefreshCw } from "lucide-react";
+import { useLocation } from 'react-router-dom';
 
 const ReservationPage = () => {
+  const location = useLocation();
+  const { hotelName, totalPrice, roomCount } = location.state || {};
+
   const today = new Date().toISOString().split("T")[0];
 
   const [formData, setFormData] = useState({
@@ -12,10 +16,11 @@ const ReservationPage = () => {
     email: '',
     checkIn: '',
     checkOut: '',
-    roomType: 'SINGLE',
-    roomPrice: 695,
+    roomCount: roomCount || 1,
+    roomPrice: totalPrice || 'Rs',
     phone: '',
     message: '',
+    hotelName: hotelName || '',
   });
 
   const [errors, setErrors] = useState({});
@@ -51,18 +56,20 @@ const ReservationPage = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const formattedData = {
+    const reservationData = {
       ...formData,
       checkIn: formData.checkIn.split("T")[0],
       checkOut: formData.checkOut.split("T")[0],
+      totalPrice: totalPrice
     };
 
     try {
-      await axios.post('http://localhost:4000/api/reservations/', formattedData);
+      await axios.post('http://localhost:4000/api/reservations/', reservationData);
       toast.success('Reservation submitted successfully!');
       resetForm();
     } catch (error) {
       toast.error('Error submitting reservation');
+      console.error('Error:', error);
     }
   };
 
@@ -72,10 +79,11 @@ const ReservationPage = () => {
       email: '',
       checkIn: '',
       checkOut: '',
-      roomType: 'SINGLE',
-      roomPrice: 695,
+      roomCount: roomCount || 1,
+      roomPrice: totalPrice || 'Rs',
       phone: '',
       message: '',
+      hotelName: hotelName || '',
     });
     setErrors({});
   };
@@ -84,10 +92,10 @@ const ReservationPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-50 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden">
         <div className="flex flex-col md:flex-row">
-          {/* Left Sidebar - Hotel Image/Info */}
+          {/* Left Sidebar - Hotel Info */}
           <div className="bg-indigo-600 text-white p-8 md:w-1/3">
             <div className="h-full flex flex-col">
-              <h2 className="text-2xl font-bold mb-6">LuxStay Hotel</h2>
+              <h2 className="text-2xl font-bold mb-6">{hotelName}</h2>
               <div className="mb-8">
                 <div className="h-1 w-12 bg-white rounded mb-6"></div>
                 <p className="text-indigo-100 mb-4">Experience luxury like never before with our premium accommodations and world-class service.</p>
@@ -114,6 +122,20 @@ const ReservationPage = () => {
             <h1 className="text-2xl font-bold text-gray-800 mb-6">Book Your Stay</h1>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Hotel Name (Readonly) */}
+                <div className="relative md:col-span-2">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Home size={16} className="text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="hotelName"
+                    value={formData.hotelName}
+                    readOnly
+                    className="w-full pl-10 pr-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-not-allowed"
+                  />
+                </div>
+
                 {/* Name Field */}
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -149,7 +171,7 @@ const ReservationPage = () => {
                   )}
                 </div>
 
-                {/* Check In Field */}
+                {/* Check In */}
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Calendar size={16} className="text-gray-400" />
@@ -168,7 +190,7 @@ const ReservationPage = () => {
                   )}
                 </div>
 
-                {/* Check Out Field */}
+                {/* Check Out */}
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Calendar size={16} className="text-gray-400" />
@@ -187,39 +209,38 @@ const ReservationPage = () => {
                   )}
                 </div>
 
-                {/* Room Type Field */}
+                {/* Room Count */}
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Home size={16} className="text-gray-400" />
                   </div>
-                  <select
-                    name="roomType"
-                    value={formData.roomType}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="Deluxe">Deluxe Suite</option>
-                    <option value="Standard">Standard Room</option>
-                    <option value="Executive">Executive Suite</option>
-                  </select>
-                </div>
-
-                {/* Room Price Field */}
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-400">$</span>
-                  </div>
                   <input
                     type="number"
-                    name="roomPrice"
-                    value={formData.roomPrice}
+                    name="roomCount"
+                    value={formData.roomCount}
                     onChange={handleChange}
+                    min="1"
                     required
                     className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
                 </div>
 
-                {/* Phone Field */}
+                {/* Room Price */}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span className="text-gray-400">Rs.</span>
+                  </div>
+                  <input
+                    type="number"
+                    name="roomPrice"
+                    value={formData.roomPrice}
+                    
+                    required
+                    className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Phone */}
                 <div className="relative md:col-span-2">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Phone size={16} className="text-gray-400" />
@@ -276,8 +297,6 @@ const ReservationPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Toast container must be rendered */}
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );

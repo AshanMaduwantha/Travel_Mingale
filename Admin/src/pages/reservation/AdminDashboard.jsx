@@ -91,9 +91,7 @@ const AdminDashboard = () => {
 
   const filteredReservations = reservations.filter((res) => {
     const matchesSearch =
-      res.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      res.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      res.roomType?.toLowerCase().includes(searchTerm.toLowerCase());
+      res.hotelName?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === "all" || res.status === statusFilter;
 
@@ -130,6 +128,7 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      {/* Header Controls */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Reservation Management</h2>
@@ -139,7 +138,7 @@ const AdminDashboard = () => {
           <div className="relative">
             <input
               type="text"
-              placeholder="Search reservations..."
+              placeholder="Search Hotel..."
               className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -169,55 +168,47 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Total Reservations</p>
-              <p className="text-2xl font-bold text-gray-800">{stats.total}</p>
-            </div>
-            <div className="p-3 bg-blue-50 rounded-full">
-              <Calendar className="h-6 w-6 text-blue-500" />
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Confirmed</p>
-              <p className="text-2xl font-bold text-green-600">{stats.confirmed}</p>
-            </div>
-            <div className="p-3 bg-green-50 rounded-full">
-              <UserCheck className="h-6 w-6 text-green-500" />
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Pending</p>
-              <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
-            </div>
-            <div className="p-3 bg-yellow-50 rounded-full">
-              <Clock className="h-6 w-6 text-yellow-500" />
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Cancelled</p>
-              <p className="text-2xl font-bold text-red-600">{stats.cancelled}</p>
-            </div>
-            <div className="p-3 bg-red-50 rounded-full">
-              <UserX className="h-6 w-6 text-red-500" />
+        {[
+          {
+            title: "Total Reservations",
+            value: stats.total,
+            icon: <Calendar className="h-6 w-6 text-blue-500" />,
+            bg: "bg-blue-50",
+          },
+          {
+            title: "Confirmed",
+            value: stats.confirmed,
+            icon: <UserCheck className="h-6 w-6 text-green-500" />,
+            bg: "bg-green-50",
+          },
+          {
+            title: "Pending",
+            value: stats.pending,
+            icon: <Clock className="h-6 w-6 text-yellow-500" />,
+            bg: "bg-yellow-50",
+          },
+          {
+            title: "Cancelled",
+            value: stats.cancelled,
+            icon: <UserX className="h-6 w-6 text-red-500" />,
+            bg: "bg-red-50",
+          },
+        ].map((card, i) => (
+          <div key={i} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">{card.title}</p>
+                <p className="text-2xl font-bold text-gray-800">{card.value}</p>
+              </div>
+              <div className={`p-3 rounded-full ${card.bg}`}>{card.icon}</div>
             </div>
           </div>
-        </div>
+        ))}
       </div>
 
-      {/* Table */}
+      {/* Reservations Table */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
         {loading ? (
           <div className="flex justify-center items-center h-64">
@@ -254,6 +245,9 @@ const AdminDashboard = () => {
                 {filteredReservations.map((reservation) => (
                   <tr key={reservation._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
+                      <div className="font-semibold text-gray-800 mb-1">
+                        {reservation.hotelName || "Hotel Unknown"}
+                      </div>
                       <div className="flex items-center">
                         <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold mr-3">
                           {reservation.name?.charAt(0) || "G"}
@@ -277,7 +271,7 @@ const AdminDashboard = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center text-sm text-gray-900 mb-1">
                         <Hotel className="h-4 w-4 mr-2 text-gray-500" />
-                        {reservation.roomType}
+                        {reservation.roomCount}
                       </div>
                       <div className="flex items-center text-sm text-gray-900">
                         <DollarSign className="h-4 w-4 mr-2 text-gray-500" />
@@ -325,6 +319,7 @@ const AdminDashboard = () => {
         )}
       </div>
 
+      {/* Footer */}
       <div className="mt-5 flex flex-col sm:flex-row items-center justify-between">
         <div className="text-sm text-gray-500 mb-4 sm:mb-0">
           Showing <span className="font-medium">{filteredReservations.length}</span> of{" "}
