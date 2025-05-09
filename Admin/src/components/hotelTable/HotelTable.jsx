@@ -17,10 +17,11 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
-  Download
+  Download,
+  FileText
 } from "lucide-react";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const HotelTable = () => {
   const navigate = useNavigate();
@@ -152,103 +153,222 @@ const HotelTable = () => {
     );
   };
 
-  // Generate and download PDF
+  // Add Travel Mingel header to PDF
+  const addTravelMingelHeader = (doc) => {
+    // Main header with brand color
+    doc.setFillColor(30, 120, 180); // Travel Mingel blue
+    doc.rect(0, 0, doc.internal.pageSize.width, 20, 'F');
+    
+    // Logo text
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.setTextColor(255, 255, 255);
+    doc.text('Travel Mingel', 15, 13);
+    
+    // Tagline
+    doc.setFontSize(10);
+    doc.text('Connecting travelers worldwide', 15, 18);
+    
+    // Report title section
+    doc.setFillColor(240, 248, 255); // Light blue background
+    doc.rect(0, 20, doc.internal.pageSize.width, 15, 'F');
+    
+    return 35; // Return the Y position after header
+  };
+
+  // Add Travel Mingel footer to PDF
+  const addTravelMingelFooter = (doc) => {
+    const pageCount = doc.internal.getNumberOfPages();
+    
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      
+      // Footer line
+      doc.setDrawColor(30, 120, 180);
+      doc.setLineWidth(0.5);
+      doc.line(20, doc.internal.pageSize.height - 20, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 20);
+      
+      // Footer text
+      doc.setFontSize(9);
+      doc.setTextColor(100);
+      doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 15, { align: 'center' });
+      doc.text('© Travel Mingel - Confidential', doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+    }
+  };
+
+  // Generate and download PDF for all hotels with Travel Mingel branding
   const handleDownloadPDF = () => {
     setIsPdfGenerating(true);
     
-    // Create a new PDF document
-    const doc = new jsPDF('landscape');
-    const pageWidth = doc.internal.pageSize.getWidth();
-    
-    // Add title
-    doc.setFontSize(20);
-    doc.setTextColor(40, 40, 40);
-    doc.text("Hotel Management Report", pageWidth / 2, 20, { align: 'center' });
-    
-    // Add date
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, pageWidth / 2, 27, { align: 'center' });
-    
-    // Add filter info if any
-    if (searchTerm || filterType) {
-      let filterText = "Filters applied: ";
-      if (searchTerm) filterText += `Search "${searchTerm}" `;
-      if (filterType) filterText += `Type "${filterType}" `;
-      doc.text(filterText, pageWidth / 2, 34, { align: 'center' });
-    }
-    
-    // Add statistics
-    doc.setFontSize(12);
-    doc.setTextColor(60, 60, 60);
-    doc.text(`Total Hotels: ${hotels.length}`, 14, 45);
-    doc.text(`Average Price: Rs.${hotels.length > 0 
-      ? Math.round(hotels.reduce((sum, hotel) => sum + hotel.price, 0) / hotels.length)
-      : 0}`, 14, 52);
+    try {
+      const doc = new jsPDF('landscape');
+      const pageWidth = doc.internal.pageSize.getWidth();
       
-    // Set up table columns
-    const columns = [
-      { header: "Hotel Name", dataKey: "name" },
-      { header: "Type", dataKey: "type" },
-      { header: "Location", dataKey: "location" },
-      { header: "Distance", dataKey: "distance" },
-      { header: "Price (Rs.)", dataKey: "price" },
-      { header: "Rating", dataKey: "rating" }
-    ];
-    
-    // Convert hotel data for table
-    const data = processedHotels.map(hotel => ({
-      name: hotel.name,
-      type: hotel.type,
-      location: hotel.city,
-      distance: `${hotel.distance} km`,
-      price: hotel.price,
-      rating: (hotel.rating || 4 + Math.random()).toFixed(1)
-    }));
-    
-    // Add table to document
-    doc.autoTable({
-      startY: 60,
-      head: [columns.map(col => col.header)],
-      body: data.map(item => columns.map(col => item[col.dataKey])),
-      theme: 'grid',
-      headStyles: {
-        fillColor: [66, 139, 202],
-        textColor: 255,
-        fontStyle: 'bold'
-      },
-      alternateRowStyles: {
-        fillColor: [245, 245, 245]
-      },
-      styles: {
-        overflow: 'linebreak',
-        cellPadding: 3,
-      },
-      columnStyles: {
-        name: { cellWidth: 50 },
-        location: { cellWidth: 50 },
-        type: { cellWidth: 30 },
-        distance: { cellWidth: 25 },
-        price: { cellWidth: 25 },
-        rating: { cellWidth: 25 },
-      }
-    });
-    
-    // Add footer with page numbers
-    const pageCount = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text(`Page ${i} of ${pageCount}`, pageWidth - 20, doc.internal.pageSize.getHeight() - 10);
-      doc.text('Hotel Management System', 20, doc.internal.pageSize.getHeight() - 10);
+      // Add header and get starting Y position
+      const startY = addTravelMingelHeader(doc);
+      
+      // Main title
+      doc.setFontSize(16);
+      doc.setTextColor(30, 120, 180);
+      doc.text('Hotel Management Report', pageWidth / 2, startY, { align: 'center' });
+      
+      // Subtitle
+      doc.setFontSize(12);
+      doc.setTextColor(100);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()} | ${processedHotels.length} hotels found`, 
+        pageWidth / 2, startY + 7, { align: 'center' });
+      
+      // Summary section
+      const averagePrice = hotels.length > 0 
+        ? Math.round(hotels.reduce((sum, hotel) => sum + hotel.price, 0) / hotels.length)
+        : 0;
+      
+      doc.setFontSize(10);
+      doc.setTextColor(30, 120, 180);
+      doc.text('Summary:', 14, startY + 20);
+      doc.setTextColor(100);
+      doc.text(`• Total Hotels: ${hotels.length}`, 20, startY + 25);
+      doc.text(`• Average Price: Rs.${averagePrice}`, 20, startY + 30);
+      
+      // Get top location
+      const topLocation = hotels.length > 0 
+        ? (() => {
+            const locations = {};
+            hotels.forEach(hotel => {
+              locations[hotel.city] = (locations[hotel.city] || 0) + 1;
+            });
+            return Object.keys(locations).reduce((a, b) => 
+              locations[a] > locations[b] ? a : b, "");
+          })()
+        : "N/A";
+      
+      doc.text(`• Top Location: ${topLocation}`, 20, startY + 35);
+      
+      // Hotels table
+      const tableData = processedHotels.map(hotel => [
+        hotel.name || "N/A",
+        hotel.type || "N/A",
+        hotel.city || "N/A",
+        `${hotel.distance} km` || "N/A",
+        `Rs.${hotel.price}` || "N/A",
+        (hotel.rating || 4 + Math.random()).toFixed(1)
+      ]);
+      
+      autoTable(doc, {
+        startY: startY + 45,
+        head: [["Hotel Name", "Type", "Location", "Distance", "Price", "Rating"]],
+        body: tableData,
+        theme: "grid",
+        headStyles: { 
+          fillColor: [30, 120, 180],
+          textColor: 255,
+          fontStyle: 'bold'
+        },
+        alternateRowStyles: { fillColor: [240, 248, 255] },
+        styles: { 
+          cellPadding: 3,
+          fontSize: 9,
+          overflow: 'linebreak'
+        },
+        margin: { top: 10 },
+        pageBreak: 'auto',
+        tableWidth: 'wrap'
+      });
+      
+      // Add footer
+      addTravelMingelFooter(doc);
+      
+      // Save PDF
+      doc.save("Travel_Mingel_Hotels_Report.pdf");
+      showNotification("PDF exported successfully", "success");
+    } catch (err) {
+      console.error("PDF Export failed:", err);
+      showNotification("Failed to export PDF", "error");
+    } finally {
+      setIsPdfGenerating(false);
     }
+  };
+
+  // Generate and download PDF for single hotel with Travel Mingel branding
+  const handleExportHotelPDF = (hotel) => {
+    setIsPdfGenerating(true);
     
-    // Save PDF
-    doc.save("hotel-management-report.pdf");
-    
-    setIsPdfGenerating(false);
-    showNotification("PDF downloaded successfully", "success");
+    try {
+      const doc = new jsPDF();
+      
+      // Add header and get starting Y position
+      const startY = addTravelMingelHeader(doc);
+      
+      // Main title
+      doc.setFontSize(16);
+      doc.setTextColor(30, 120, 180);
+      doc.text('Hotel Profile Details', 105, startY, { align: 'center' });
+      
+      // Subtitle
+      doc.setFontSize(12);
+      doc.setTextColor(100);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 105, startY + 7, { align: 'center' });
+      
+      // Hotel header section
+      doc.setFillColor(240, 248, 255);
+      doc.roundedRect(20, startY + 15, 170, 20, 3, 3, 'F');
+      doc.setFontSize(14);
+      doc.setTextColor(30, 120, 180);
+      doc.text(`${hotel.name || 'Hotel Profile'}`, 25, startY + 25);
+      
+      // Hotel details table
+      const hotelData = [
+        ["Hotel Name:", hotel.name || "N/A"],
+        ["Type:", hotel.type || "N/A"],
+        ["Location:", hotel.city || "N/A"],
+        ["Address:", hotel.address || "N/A"],
+        ["Distance:", `${hotel.distance} km from center` || "N/A"],
+        ["Price:", `Rs.${hotel.price}` || "N/A"],
+        ["Rating:", (hotel.rating || 4 + Math.random()).toFixed(1)],
+        ["Description:", hotel.title || "N/A"],
+        ["Created At:", hotel.createdAt ? new Date(hotel.createdAt).toLocaleDateString() : "N/A"]
+      ];
+      
+      autoTable(doc, {
+        startY: startY + 40,
+        head: [["Field", "Details"]],
+        body: hotelData,
+        theme: "grid",
+        headStyles: { 
+          fillColor: [30, 120, 180],
+          textColor: 255,
+          fontStyle: 'bold'
+        },
+        alternateRowStyles: { fillColor: [240, 248, 255] },
+        styles: { 
+          cellPadding: 5,
+          fontSize: 10,
+          valign: 'middle'
+        },
+        columnStyles: {
+          0: { fontStyle: 'bold', cellWidth: 40 }
+        },
+        margin: { top: 10 }
+      });
+      
+      // Additional notes section
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text('This document contains confidential hotel information for Travel Mingel internal use only.', 
+        14, doc.internal.pageSize.height - 30, { maxWidth: 180 });
+      
+      // Add footer
+      addTravelMingelFooter(doc);
+      
+      // Save PDF
+      doc.save(`Travel_Mingel_Hotel_${hotel.name || 'Profile'}.pdf`);
+      showNotification("PDF exported successfully", "success");
+    } catch (err) {
+      console.error("PDF Export failed:", err);
+      showNotification("Failed to export PDF", "error");
+    } finally {
+      setIsPdfGenerating(false);
+    }
   };
 
   return (
@@ -315,19 +435,34 @@ const HotelTable = () => {
                 <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
               </button>
               
-              <button
-                className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors relative"
-                onClick={handleDownloadPDF}
-                disabled={isPdfGenerating || processedHotels.length === 0}
-                title="Download PDF Report"
-              >
-                <Download className={`h-5 w-5 ${isPdfGenerating ? 'opacity-50' : ''}`} />
-                {isPdfGenerating && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-4 h-4 border-2 border-t-transparent border-green-600 rounded-full animate-spin"></div>
-                  </div>
-                )}
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => document.getElementById("exportDropdown").classList.toggle("hidden")}
+                  className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg shadow flex items-center justify-center"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                  <ChevronDown className="h-4 w-4 ml-2" />
+                </button>
+                <div id="exportDropdown" className="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10">
+                  <ul className="py-1">
+                    <li>
+                      <button
+                        onClick={handleDownloadPDF}
+                        disabled={isPdfGenerating || processedHotels.length === 0}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center text-gray-700"
+                      >
+                        {isPdfGenerating ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                        ) : (
+                          <FileText className="h-4 w-4 mr-2" />
+                        )}
+                        Export All as PDF
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
               
               <button
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
@@ -533,6 +668,13 @@ const HotelTable = () => {
                             title="Edit"
                           >
                             <Edit2 className="h-5 w-5" />
+                          </button>
+                          <button
+                            className="text-green-600 hover:bg-green-50 p-2 rounded-lg transition-colors"
+                            onClick={() => handleExportHotelPDF(hotel)}
+                            title="Export PDF"
+                          >
+                            <FileText className="h-5 w-5" />
                           </button>
                           <button
                             className="text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors"
