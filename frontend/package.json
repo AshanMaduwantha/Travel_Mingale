@@ -13,6 +13,8 @@
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "github:fortawesome/react-fontawesome",
+    "@google/genai": "^0.13.0",
+    "@google/generative-ai": "^0.24.1",
     "@tailwindcss/vite": "^4.0.15",
     "axios": "^1.8.4",
     "date-fns": "^4.1.0",
