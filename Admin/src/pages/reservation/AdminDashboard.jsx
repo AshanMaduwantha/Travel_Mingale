@@ -335,7 +335,7 @@ const AdminDashboard = () => {
         ["Check-In:", reservation.checkIn ? new Date(reservation.checkIn).toLocaleDateString() : "N/A"],
         ["Check-Out:", reservation.checkOut ? new Date(reservation.checkOut).toLocaleDateString() : "N/A"],
         ["Room Count:", reservation.roomCount || "N/A"],
-        ["Room Price:", reservation.roomPrice ? `$${reservation.roomPrice}` : "N/A"],
+        ["Room Price:", reservation.roomPrice ? `${reservation.roomPrice}` : "N/A"],
         ["Status:", reservation.status || "N/A"],
         ["Special Requests:", reservation.message || "N/A"]
       ];
@@ -597,8 +597,8 @@ const AdminDashboard = () => {
                         {reservation.roomCount} room(s)
                       </div>
                       <div className="flex items-center text-sm text-gray-900">
-                        <DollarSign className="h-4 w-4 mr-2 text-gray-500" />
-                        ${reservation.roomPrice || "0"}
+                    
+                        Rs.{reservation.roomPrice || "0"}
                       </div>
                     </td>
                     <td className="px-6 py-4">
