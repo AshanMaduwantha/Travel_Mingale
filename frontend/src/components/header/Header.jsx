@@ -54,7 +54,7 @@ const Header = ({ type }) => {
   };
 
   return (
-    <div className="bg-[#003580] text-white flex justify-center relative">
+    <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex justify-center relative">
       <div className={`w-full max-w-4xl my-5 ${type === "list" ? "mb-0" : "mb-24"}`}>
         <div className="flex gap-10 mb-12">
           <div className="flex items-center gap-2 py-2 px-4 border-2 border-white rounded-full">
@@ -197,7 +197,7 @@ const Header = ({ type }) => {
 
               <div className="flex items-center gap-2">
                 <button
-                  className="bg-[#0071c2] text-white font-medium py-2 px-4 rounded-md cursor-pointer"
+                  className="bg-blue-600 text-white font-medium py-2 px-4 rounded-md cursor-pointer"
                   onClick={handleSearch}
                 >
                   Search

@@ -32,6 +32,8 @@ const Featured = () => {
   ];
 
   return (
+    
+      
     <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-5 gap-5 z-30 relative ">
       {loading ? (
         "Loading please wait..."
@@ -47,6 +49,7 @@ const Featured = () => {
         ))
       )}
     </div>
+   
   );
 };
 
