@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { FaStar } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const ReviewForm = () => {
   const navigate = useNavigate();
-
-  const hotel = {
-    id: "661b41a95c45fcff7c5530a2",
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const hotelIdFromUrl = queryParams.get("hotelId");
+  
+  const [hotel, setHotel] = useState({
+    id: hotelIdFromUrl || "661b41a95c45fcff7c5530a2", // Use the URL param or fallback to default
     name: "Seaside Escape Resort",
     price: "$250 per night",
     description: "Enjoy a peaceful stay by the ocean with luxurious rooms and stunning views.",
     image: [
       "https://images.unsplash.com/photo-1501117716987-c8e8b8d96557?auto=format&fit=crop&w=1400&q=80"
     ],
-  };
+  });
 
   const [newReview, setNewReview] = useState({ name: "", rating: 0, comment: "" });
   const [reviews, setReviews] = useState([]);
@@ -30,6 +33,37 @@ const ReviewForm = () => {
   const [editSuccess, setEditSuccess] = useState("");
 
   const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
+
+  // Optional: Fetch hotel details based on the hotelId
+  useEffect(() => {
+    if (hotelIdFromUrl) {
+      // You can add an API call here to fetch hotel details
+      // For example:
+      /*
+      const fetchHotelDetails = async () => {
+        try {
+          const res = await axios.get(`http://localhost:4000/api/hotels/${hotelIdFromUrl}`);
+          setHotel({
+            id: res.data._id,
+            name: res.data.name,
+            price: res.data.price,
+            description: res.data.description,
+            image: res.data.images,
+          });
+        } catch (err) {
+          console.error("Error fetching hotel details:", err);
+        }
+      };
+      fetchHotelDetails();
+      */
+      
+      // For now, we'll just update the ID in the existing hotel object
+      setHotel(prevHotel => ({
+        ...prevHotel,
+        id: hotelIdFromUrl
+      }));
+    }
+  }, [hotelIdFromUrl]);
 
   useEffect(() => {
     const fetchReviews = async () => {

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
-import { TrendingUp, TrendingDown, Star, Activity, MessageSquare, Calendar, ChevronDown, ChevronUp, Filter } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, Sector, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { Star, Loader, AlertTriangle, RefreshCw, TrendingUp, TrendingDown, Activity, MessageSquare, Calendar, ChevronDown, ChevronUp, Filter } from "lucide-react";
 
 const ReviewPerformance = () => {
   const [metrics, setMetrics] = useState({
@@ -13,44 +13,137 @@ const ReviewPerformance = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const [animateChart, setAnimateChart] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [hoverIndex, setHoverIndex] = useState(null);
   const [timeframe, setTimeframe] = useState("all");
   const [expandedSection, setExpandedSection] = useState("all");
-  
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const animationTimerRef = useRef(null);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
   useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        // Simulate API call with loading delay for demo
-        setTimeout(() => {
-          // Mock data for demonstration
-          const mockData = [
-            { id: 1, rating: 5, date: "2025-04-30" },
-            { id: 2, rating: 4, date: "2025-04-29" },
-            { id: 3, rating: 5, date: "2025-04-28" },
-            { id: 4, rating: 3, date: "2025-04-27" },
-            { id: 5, rating: 5, date: "2025-04-26" },
-            { id: 6, rating: 2, date: "2025-04-25" },
-            { id: 7, rating: 4, date: "2025-04-24" },
-            { id: 8, rating: 5, date: "2025-04-23" },
-            { id: 9, rating: 1, date: "2025-04-22" },
-            { id: 10, rating: 3, date: "2025-04-21" },
-            { id: 11, rating: 5, date: "2025-04-20" },
-            { id: 12, rating: 4, date: "2025-04-19" },
-            { id: 13, rating: 5, date: "2025-04-18" },
-            { id: 14, rating: 4, date: "2025-04-17" },
-            { id: 15, rating: 2, date: "2025-04-16" },
-          ];
-          processReviewData(mockData);
-          setLoading(false);
-        }, 1000);
-      } catch (err) {
-        setError("Failed to load reviews data.");
-        console.error("Error fetching reviews:", err);
-        setLoading(false);
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
       }
     };
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
-    fetchReviews();
-  }, [timeframe]);
+  // Enhanced function to animate the chart with consistent behavior
+  const animateChartSequence = () => {
+    // Clear any existing animation timer
+    if (animationTimerRef.current) {
+      clearInterval(animationTimerRef.current);
+    }
+    
+    setAnimateChart(true);
+    
+    // Start the animation cycle through each segment with a slower interval (2500ms)
+    // This makes the animation more noticeable and consistent across refresh methods
+    let index = 0;
+    
+    // First, reset any active index
+    setActiveIndex(null);
+    
+    // Brief delay before starting animation sequence
+    setTimeout(() => {
+      animationTimerRef.current = setInterval(() => {
+        setActiveIndex(index);
+        index = (index + 1) % chartData.length;
+        
+        // Stop the animation after one full cycle
+        if (index === 0) {
+          clearInterval(animationTimerRef.current);
+          animationTimerRef.current = null;
+        }
+      }, 2500); // Increased from 1500ms to 2500ms for slower animation
+    }, 300);
+  };
+
+  const fetchReviews = async () => {
+    try {
+      setError("");
+      // Using the same logic for fetching data
+      const response = await fetch("http://localhost:4000/api/reviews");
+      const data = await response.json();
+      processReviewData(data);
+      
+      // After data is processed, trigger animation with a consistent delay
+      // The animation itself will now be triggered after loading state is removed
+      setTimeout(() => {
+        setLoading(false);
+        setRefreshing(false);
+        
+        // Start animation sequence after UI has rendered
+        setTimeout(() => {
+          animateChartSequence();
+        }, 500);
+      }, 800);
+      
+    } catch (err) {
+      setError("Failed to load reviews data.");
+      console.error("Error fetching reviews:", err);
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  // Function to handle page refresh via browser refresh
+  useEffect(() => {
+    // This will run when the component mounts
+    const handleInitialLoad = () => {
+      setLoading(true);
+      // Add a deliberate delay on initial page load to match the refresh button behavior
+      setTimeout(() => {
+        fetchReviews();
+      }, 600);
+    };
+    
+    handleInitialLoad();
+    
+    // Cleanup on component unmount
+    return () => {
+      if (animationTimerRef.current) {
+        clearInterval(animationTimerRef.current);
+        animationTimerRef.current = null;
+      }
+    };
+  }, []);
+  
+  // Handle manual refresh button click with the same animation sequence
+  const handleRefresh = () => {
+    setRefreshing(true);
+    setLoading(true);
+    setActiveIndex(null); // Reset active index for clean animation start
+    
+    // Use the same delay for consistency in animation
+    setTimeout(() => {
+      fetchReviews();
+    }, 600);
+  };
+
+  // Function to handle timeframe change
+  const handleTimeframeChange = (newTimeframe) => {
+    setTimeframe(newTimeframe);
+    setDropdownOpen(false);
+    
+    // In a real app, you would fetch data based on the new timeframe
+    setRefreshing(true);
+    setLoading(true);
+    
+    // Simulate fetching new data based on timeframe
+    setTimeout(() => {
+      fetchReviews();
+    }, 600);
+  };
 
   const processReviewData = (reviewsData) => {
     const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
@@ -90,17 +183,87 @@ const ReviewPerformance = () => {
     count: metrics.ratingDistribution[rating],
     color: rating >= 4 ? "#10B981" : rating === 3 ? "#F59E0B" : "#EF4444"
   }));
+  
+  // Custom active shape for pie chart animation and hover
+  const renderActiveShape = (props) => {
+    const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, value } = props;
+    const sin = Math.sin(-midAngle * Math.PI / 180);
+    const cos = Math.cos(-midAngle * Math.PI / 180);
+    const sx = cx + (outerRadius + 10) * cos;
+    const sy = cy + (outerRadius + 10) * sin;
+    const mx = cx + (outerRadius + 30) * cos;
+    const my = cy + (outerRadius + 30) * sin;
+    const ex = mx + (cos >= 0 ? 1 : -1) * 22;
+    const ey = my;
+    const textAnchor = cos >= 0 ? 'start' : 'end';
+
+    return (
+      <g>
+        <text x={cx} y={cy} dy={8} textAnchor="middle" fill="#333" className="text-base font-medium">
+          {payload.name}
+        </text>
+        <Sector
+          cx={cx}
+          cy={cy}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          fill={fill}
+        />
+        <Sector
+          cx={cx}
+          cy={cy}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          innerRadius={outerRadius + 6}
+          outerRadius={outerRadius + 10}
+          fill={fill}
+        />
+        <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
+        <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
+        <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="#333" className="text-sm font-medium">{`${value} reviews`}</text>
+        <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={18} textAnchor={textAnchor} fill="#666" className="text-xs">
+          {`(${(percent * 100).toFixed(2)}%)`}
+        </text>
+      </g>
+    );
+  };
+  
+  // Handlers for pie chart interaction
+  const onPieEnter = (_, index) => {
+    setHoverIndex(index);
+  };
+  
+  const onPieLeave = () => {
+    setHoverIndex(null);
+  };
 
   const toggleSection = (section) => {
     setExpandedSection(expandedSection === section ? "all" : section);
   };
 
+  // Display stars based on rating
+  const renderStars = (rating) => {
+    const stars = [];
+    for (let i = 0; i < 5; i++) {
+      stars.push(
+        <Star 
+          key={i} 
+          size={16} 
+          className={i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} 
+        />
+      );
+    }
+    return <div className="flex">{stars}</div>;
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96 bg-gray-50">
+      <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard data...</p>
+          <Loader className="mx-auto h-12 w-12 text-indigo-600 animate-spin" />
+          <p className="mt-4 text-lg font-medium text-gray-700">Loading dashboard data...</p>
         </div>
       </div>
     );
@@ -112,14 +275,15 @@ const ReviewPerformance = () => {
         <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded">
           <div className="flex items-center">
             <div className="text-red-500">
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <AlertTriangle className="h-6 w-6" />
             </div>
             <div className="ml-3">
               <h3 className="text-lg font-medium text-red-800">Error</h3>
               <p className="text-red-700">{error}</p>
-              <button className="mt-2 bg-red-100 hover:bg-red-200 text-red-800 font-semibold py-2 px-4 rounded-md transition-colors">
+              <button 
+                onClick={handleRefresh}
+                className="mt-2 bg-red-100 hover:bg-red-200 text-red-800 font-semibold py-2 px-4 rounded-md transition-colors"
+              >
                 Try Again
               </button>
             </div>
@@ -135,8 +299,9 @@ const ReviewPerformance = () => {
         <h1 className="text-3xl font-bold text-gray-800">Review Performance Dashboard</h1>
         
         <div className="mt-4 md:mt-0 flex flex-wrap space-x-2">
-          <div className="relative">
+          <div className="relative" ref={dropdownRef}>
             <button 
+              onClick={() => setDropdownOpen(!dropdownOpen)}
               className="flex items-center bg-white border border-gray-300 rounded-md px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <Calendar size={16} className="mr-2" />
@@ -145,17 +310,45 @@ const ReviewPerformance = () => {
                     timeframe === "month" ? "Last Month" : "Last Year"}</span>
               <ChevronDown size={16} className="ml-2" />
             </button>
-            {/* Dropdown would be here */}
+            
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
+                <button 
+                  onClick={() => handleTimeframeChange("all")}
+                  className={`block w-full text-left px-4 py-2 text-sm ${timeframe === "all" ? "bg-indigo-50 text-indigo-700" : "text-gray-700 hover:bg-gray-50"}`}
+                >
+                  All Time
+                </button>
+                <button 
+                  onClick={() => handleTimeframeChange("week")}
+                  className={`block w-full text-left px-4 py-2 text-sm ${timeframe === "week" ? "bg-indigo-50 text-indigo-700" : "text-gray-700 hover:bg-gray-50"}`}
+                >
+                  Last Week
+                </button>
+                <button 
+                  onClick={() => handleTimeframeChange("month")}
+                  className={`block w-full text-left px-4 py-2 text-sm ${timeframe === "month" ? "bg-indigo-50 text-indigo-700" : "text-gray-700 hover:bg-gray-50"}`}
+                >
+                  Last Month
+                </button>
+                <button 
+                  onClick={() => handleTimeframeChange("year")}
+                  className={`block w-full text-left px-4 py-2 text-sm ${timeframe === "year" ? "bg-indigo-50 text-indigo-700" : "text-gray-700 hover:bg-gray-50"}`}
+                >
+                  Last Year
+                </button>
+              </div>
+            )}
           </div>
           
-          <button className="flex items-center bg-white border border-gray-300 rounded-md px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors">
-            <Filter size={16} className="mr-2" />
-            <span>Filter</span>
-          </button>
-          
-          <button className="flex items-center bg-indigo-600 rounded-md px-4 py-2 text-white hover:bg-indigo-700 transition-colors">
-            <Activity size={16} className="mr-2" />
-            <span>Generate Report</span>
+          <button 
+            onClick={handleRefresh}
+            className="flex items-center bg-indigo-600 rounded-md px-4 py-2 text-white hover:bg-indigo-700 transition-colors"
+          >
+            <RefreshCw 
+              className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} 
+            />
+            <span>Refresh Data</span>
           </button>
         </div>
       </div>
@@ -273,6 +466,7 @@ const ReviewPerformance = () => {
         )}
       </div>
       
+      {/* Rest of the component remains the same... */}
       {/* Visualizations */}
       <div className="grid md:grid-cols-2 gap-8 mb-8">
         {/* Pie Chart */}
@@ -293,23 +487,54 @@ const ReviewPerformance = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
+                      activeIndex={hoverIndex !== null ? hoverIndex : (animateChart ? activeIndex : null)}
+                      activeShape={renderActiveShape}
                       data={chartData}
                       cx="50%"
                       cy="50%"
                       innerRadius={60}
-                      outerRadius={90}
-                      paddingAngle={5}
+                      outerRadius={80}
+                      paddingAngle={4}
                       dataKey="value"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      animationBegin={0}
+                      animationDuration={1500}
+                      isAnimationActive={true}
+                      onMouseEnter={onPieEnter}
+                      onMouseLeave={onPieLeave}
                     >
                       {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={entry.color} 
+                          stroke="#fff"
+                          strokeWidth={2}
+                        />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => [`${value} reviews`]} />
-                    <Legend verticalAlign="bottom" height={36} />
+                    <Tooltip 
+                      formatter={(value, name) => [`${value} reviews`, name]}
+                      contentStyle={{
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        padding: '12px',
+                        border: 'none',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)'
+                      }}
+                    />
+                    <Legend 
+                      verticalAlign="bottom" 
+                      height={36}
+                      iconType="circle"
+                      formatter={(value) => (
+                        <span style={{ color: '#333', fontSize: '14px', fontWeight: '500' }}>{value}</span>
+                      )}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
+              </div>
+              <div className="mt-4 bg-gray-50 p-3 rounded-md border border-gray-100">
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Chart Navigation</h3>
+                <p className="text-xs text-gray-600">Watch the progressive animation highlight each segment. Hover over segments anytime to see detailed information.</p>
               </div>
             </div>
           )}
@@ -400,12 +625,19 @@ const ReviewPerformance = () => {
             
             <div className="mt-8 flex justify-center">
               <button className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-medium py-2 px-6 rounded-md transition-colors flex items-center">
+              <a href="/adminreview">
                 <span>View All Reviews</span>
+            </a>
                 <ChevronDown size={16} className="ml-2" />
               </button>
             </div>
           </div>
         )}
+      </div>
+      
+      {/* Footer with last updated */}
+      <div className="mt-8 text-center text-sm text-gray-500">
+        <p>Last updated: {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}</p>
       </div>
     </div>
   );
