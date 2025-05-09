@@ -9,8 +9,11 @@ router.post("/", async (req, res) => {
     const {
         name, email, checkIn, checkOut,
         roomCount, roomPrice, phone, message,
-        hotelName // ✅ new field
+        hotelName, city
     } = req.body;
+
+    console.log("Request body:", req.body);
+    
 
     // Validate required fields including hotelName
     if (!name || !email || !checkIn || !checkOut ||
