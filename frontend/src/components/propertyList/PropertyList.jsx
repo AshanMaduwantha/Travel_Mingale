@@ -55,7 +55,7 @@ function PropertyList() {
   return (
     <div className="w-full max-w-7xl mx-auto py-12 px-4">
       <div className="mb-10 text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">Browse by property type</h2>
+        <h2 className="text-3xl font-bold text-gray-800 mb-2">Find the Perfect Stay</h2>
         <p className="text-gray-600 max-w-2xl mx-auto">Discover the perfect accommodation for your next adventure</p>
       </div>
       

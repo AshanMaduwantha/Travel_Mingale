@@ -19,6 +19,8 @@ import {
   Lightbulb,
 } from "lucide-react";
 import { GoogleGenAI } from "@google/genai";
+import Navbar from "../components/Navbar";
+import Header from "../components/header/Header";
 
 ReactModal.setAppElement("#root");
 
@@ -348,11 +350,14 @@ const BookedReservations = () => {
   };
 
   return (
+    <div>
+      <Navbar/>
+    
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6 mt-20">
           {/* Header Section */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-6">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-6 ">
             <h1 className="text-3xl font-bold text-white">Your Bookings</h1>
             <p className="text-blue-100 mt-2">Manage your hotel reservations</p>
           </div>
@@ -869,6 +874,7 @@ const BookedReservations = () => {
           </div>
         )}
       </ReactModal>
+    </div>
     </div>
   );
 };
