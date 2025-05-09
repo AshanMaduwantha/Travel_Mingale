@@ -343,7 +343,7 @@ const NewHotel = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Starting Price (₹)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Starting Price (Rs)</label>
                   <input 
                     type="number" 
                     {...register("price")} 

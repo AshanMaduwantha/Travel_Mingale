@@ -11,8 +11,11 @@ import {
   faCalendarDays,
   faUser,
   faArrowRight,
-  faCloudSun
+  faCloudSun,
+  faComment
 } from "@fortawesome/free-solid-svg-icons";
+import axios from "axios";
+
 
 import Header from '../../components/header/Header';
 import MailList from '../../components/mailList/MailList';
@@ -22,6 +25,7 @@ import { SearchContext } from '../../context/SearchContext.jsx';
 import fallback from "./image/araliya.jpg";
 
 import WeatherApp from '../../components/weatherapp/WeatherApp.jsx';
+import Navbar from '../../components/Navbar.jsx';
 
 const Hotel = () => {
   const location = useLocation();
@@ -30,9 +34,39 @@ const Hotel = () => {
   const [slideNumber, setSlideNumber] = useState(0);
   const [open, setOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [reviews, setReviews] = useState([]);
 
   const { data, loading, error } = useFetch(`http://localhost:4000/api/hotels/find/${id}`);
   const { dates, options } = useContext(SearchContext);
+
+  //load more review
+  const [visibleCount, setVisibleCount] = useState(3);
+
+
+
+    // Fetch reviews when the hotel data is loaded
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await axios.get(`http://localhost:4000/api/reviews?hotelId=${id}`);
+        setReviews(res.data);
+      } catch (err) {
+        console.error("Error fetching reviews:", err);
+      }
+    };
+    
+    if (id) {
+      fetchReviews();
+    }
+  }, [id]);
+
+  const handleLoadMore = () => {
+  setVisibleCount((prev) => prev + 3);
+};
+
+const visibleReviews = reviews.slice(0, visibleCount);
+
+
 
   const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
   function dayDifference(date1, date2) {
@@ -71,6 +105,8 @@ const Hotel = () => {
 
   const handleClick = () => {
     const user = true; // Replace with actual user check
+
+    
     if (user) {
       const totalPrice = days * data.price * options.room + Math.round(data.price * days * 0.05);
       navigate("/reservation", {
@@ -78,6 +114,7 @@ const Hotel = () => {
           hotelName: data.name,
           totalPrice: totalPrice,
           roomCount: options.room,
+          city: data.city,
         }
       });
     } else {
@@ -115,6 +152,9 @@ const Hotel = () => {
   }
 
   return (
+    <div>
+      <Navbar />
+    
     <div className="bg-gray-50 min-h-screen">
       <Header type="list" />
       
@@ -439,6 +479,104 @@ const Hotel = () => {
             </div>
           </div>
         </div>
+
+        {/* Reviews Section - New Addition */}
+<div className="mb-12">
+  <div className="flex justify-between items-center mb-6">
+    <h2 className="text-2xl font-bold text-gray-800">
+      <FontAwesomeIcon icon={faComment} className="text-blue-600 mr-2" />
+      Guest Reviews
+    </h2>
+    <a 
+      href={`/reviewForm?hotelId=${id}`}
+      className="bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium py-2 px-4 rounded-full transition duration-200 flex items-center text-sm"
+    >
+      Write a Review
+      <FontAwesomeIcon icon={faStar} className="ml-2" />
+    </a>
+  </div>
+
+  {reviews.length > 0 ? (
+    <div className="space-y-6">
+      {visibleReviews.map((review) => (
+        <div key={review._id} className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <div className="flex justify-between mb-3">
+            <div className="flex items-center">
+              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                {review.name ? review.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <div className="ml-3">
+                <p className="italic font-bold text-blue-600">{review.name || 'Anonymous User'}</p>
+                <p className="text-gray-800">{review.comment}</p>
+                <p className="text-xs text-gray-500">
+                  {new Date(review.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                  })}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center">
+                <span className="font-bold mr-1">{review.rating}</span>
+                <FontAwesomeIcon icon={faStar} className="text-yellow-500" />
+              </div>
+            </div>
+          </div>
+
+          {review.title && (
+            <h4 className="font-semibold text-lg text-gray-800 mb-2">{review.title}</h4>
+          )}
+
+          <p className="text-gray-700 mb-3">{review.review}</p>
+
+          {review.positive && (
+            <div className="mt-3">
+              <p className="text-sm font-medium text-green-600 mb-1">What they liked:</p>
+              <p className="text-sm text-gray-600">{review.positive}</p>
+            </div>
+          )}
+
+          {review.negative && (
+            <div className="mt-3">
+              <p className="text-sm font-medium text-red-600 mb-1">What could be improved:</p>
+              <p className="text-sm text-gray-600">{review.negative}</p>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div className="bg-gray-50 p-6 rounded-lg text-center">
+      <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+        <FontAwesomeIcon icon={faComment} className="text-gray-400 text-xl" />
+      </div>
+      <h3 className="text-lg font-medium text-gray-700 mb-2">No reviews yet</h3>
+      <p className="text-gray-500 mb-4">Be the first to share your experience at this property</p>
+      <a 
+        href={`/reviewForm?hotelId=${id}`}
+        className="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200"
+      >
+        Write a Review
+        <FontAwesomeIcon icon={faStar} className="ml-2" />
+      </a>
+    </div>
+  )}
+
+  {/* Load More Button */}
+  {reviews.length > visibleCount && (
+    <div className="text-center mt-6">
+      <button 
+        onClick={handleLoadMore}
+        className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-6 rounded-full transition duration-200"
+      >
+        Load More Reviews
+      </button>
+    </div>
+  )}
+</div>
+
       </div>
 
       
@@ -446,6 +584,8 @@ const Hotel = () => {
       <Footer />
       
       {openModal && <Reserve setOpen={setOpenModal} hotelId={id}/>}
+    </div>
+
     </div>
   );
 };

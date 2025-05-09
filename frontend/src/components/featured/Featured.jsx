@@ -9,8 +9,8 @@ import anuradhapura from "./image/anuradhapura.jpg";
 import trincomalee from "./image/trincomalee.jpg";
 import mirissa from "./image/mirissa.webp";
 import polonnaruwa from "./image/polonnaruwa.jpg";
-import kalpitiya from "./image/kalpitiya.jpg";
-import jaffna from "./image/jaffna.jpg";
+//import kalpitiya from "./image/kalpitiya.jpg";
+//import jaffna from "./image/jaffna.jpg";
 import useFetch from "../../hooks/useFetch";
 
 const Featured = () => {
@@ -29,11 +29,11 @@ const Featured = () => {
     { name: "Trincomalee", image: trincomalee },
     { name: "Mirissa", image: mirissa },
     { name: "Polonnaruwa", image: polonnaruwa },
-    { name: "Kalpitiya", image: kalpitiya },
-    { name: "Jaffna", image: jaffna },
   ];
 
   return (
+    
+      
     <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-5 gap-5 z-30 relative ">
       {loading ? (
         "Loading please wait..."
@@ -49,6 +49,7 @@ const Featured = () => {
         ))
       )}
     </div>
+   
   );
 };
 
