@@ -11,7 +11,7 @@ function FeaturedAdventures() {
       name: "Surfing Experience",
       location: "Arugam Bay",
       price: "7,500.00",
-      rating: 9.2,
+      rating: 5,
       image: surfing,
       badge: "Water Sport"
     },
@@ -20,7 +20,7 @@ function FeaturedAdventures() {
       name: "Mountain Hiking",
       location: "Ella",
       price: "6,000.00",
-      rating: 9.0,
+      rating: 5,
       image: hiking,
       badge: "Adventure"
     },
@@ -29,7 +29,7 @@ function FeaturedAdventures() {
       name: "Wildlife Safari",
       location: "Yala National Park",
       price: "8,000.00",
-      rating: 8.8,
+      rating: 5,
       image: safari,
       badge: "Nature"
     },
@@ -38,7 +38,7 @@ function FeaturedAdventures() {
       name: "Scuba Diving",
       location: "Trincomalee",
       price: "9,500.00",
-      rating: 9.5,
+      rating: 5,
       image: diving,
       badge: "Underwater"
     }

@@ -60,7 +60,7 @@ const List = () => {
 
   const handleClick = () => {
     setSearchMin(min || 5000); // Default value if empty
-    setSearchMax(max || 31000);
+    setSearchMax(max || 35000);
     
     // Update options with current values
     const updatedOptions = {

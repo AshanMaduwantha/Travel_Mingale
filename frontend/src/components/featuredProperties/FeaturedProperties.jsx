@@ -12,7 +12,7 @@ function FeaturedProperties() {
       name: "Araliya Beach Resort",
       location: "Unawatuna",
       price: "10,500.00",
-      rating: 8.9,
+      rating: 5,
       image: araliya,
       badge: "Beachfront"
     },
@@ -21,7 +21,7 @@ function FeaturedProperties() {
       name: "Taj Samudra Hotel",
       location: "Colombo",
       price: "15,000.00",
-      rating: 8.9,
+      rating: 5,
       image: tajsamudra,
       badge: "City View"
     },
@@ -30,7 +30,7 @@ function FeaturedProperties() {
       name: "Shangri-La Hotel",
       location: "Colombo",
       price: "20,000.00",
-      rating: 8.9,
+      rating: 5,
       image: shangrila,
       badge: "Luxury"
     },
@@ -39,7 +39,7 @@ function FeaturedProperties() {
       name: "Thilanka Hotel",
       location: "Kandy",
       price: "10,000.00",
-      rating: 8.9,
+      rating: 4,
       image: thilanka,
       badge: "Mountain View"
     }
