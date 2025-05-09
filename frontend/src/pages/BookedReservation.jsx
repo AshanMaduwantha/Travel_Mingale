@@ -1,12 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import ReactModal from 'react-modal';
-import { Calendar, Phone, Mail, Home, Users, MessageSquare, Edit, Trash2, Check, X, Clock, DollarSign, Info } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import ReactModal from "react-modal";
+import {
+  Calendar,
+  Phone,
+  Mail,
+  Home,
+  Users,
+  MessageSquare,
+  Edit,
+  Trash2,
+  Check,
+  X,
+  Clock,
+  DollarSign,
+  Info,
+  Lightbulb,
+} from "lucide-react";
+import { GoogleGenAI } from "@google/genai";
+import Navbar from "../components/Navbar";
+import Header from "../components/header/Header";
 
-ReactModal.setAppElement('#root');
+ReactModal.setAppElement("#root");
 
 const BookedReservations = () => {
+  const ai = new GoogleGenAI({
+    apiKey: "AIzaSyB84l8pn4aV6pZPxRtRGEkyvYNyYBjh7sw",
+  });
+
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -14,20 +36,37 @@ const BookedReservations = () => {
   const [reservationToDelete, setReservationToDelete] = useState(null);
   const [reservationToEdit, setReservationToEdit] = useState(null);
   const [formData, setFormData] = useState({
-    _id: '',
-    name: '',
-    email: '',
-    checkIn: '',
-    checkOut: '',
+    _id: "",
+    name: "",
+    email: "",
+    checkIn: "",
+    checkOut: "",
     roomCount: 1,
-    roomPrice: '',
-    phone: '',
-    message: '',
-    status: 'pending'
+    roomPrice: "",
+    phone: "",
+    message: "",
+    status: "pending",
   });
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedReservation, setSelectedReservation] = useState(null);
 
-  const formatDate = (date) => new Date(date).toISOString().split('T')[0];
-  const today = new Date().toISOString().split('T')[0];
+  const openDetailsModal = (reservation) => {
+
+    console.log(reservation);
+    
+    setSelectedReservation(reservation);
+    setIsDetailsModalOpen(true);
+
+    generateAndDisplayTips();
+  };
+
+  const closeDetailsModal = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedReservation(null);
+  };
+
+  const formatDate = (date) => new Date(date).toISOString().split("T")[0];
+  const today = new Date().toISOString().split("T")[0];
 
   const calculateNights = (checkIn, checkOut) => {
     const startDate = new Date(checkIn);
@@ -65,8 +104,8 @@ const BookedReservations = () => {
       roomCount: reservation.roomCount || 1,
       roomPrice: reservation.roomPrice,
       phone: reservation.phone,
-      message: reservation.message || '',
-      status: reservation.status || 'pending'
+      message: reservation.message || "",
+      status: reservation.status || "pending",
     });
     setReservationToEdit(reservation._id);
     setIsEditModalOpen(true);
@@ -96,51 +135,62 @@ const BookedReservations = () => {
     const errors = {};
 
     if (!formData.name.trim()) errors.name = "Name is required";
-    if (!/^\S+@\S+\.\S+$/.test(formData.email)) errors.email = "Invalid email format";
-    if (!/^\d{10}$/.test(formData.phone)) errors.phone = "Phone must be 10 digits";
-    if (new Date(formData.checkIn) < new Date(today)) errors.checkIn = "Check-in must be today or later";
-    if (new Date(formData.checkOut) <= new Date(formData.checkIn)) errors.checkOut = "Check-out must be after check-in";
-    if (isNaN(formData.roomPrice) || formData.roomPrice <= 0) errors.roomPrice = "Invalid price";
-    if (isNaN(formData.roomCount) || formData.roomCount < 1) errors.roomCount = "Invalid room count";
+    if (!/^\S+@\S+\.\S+$/.test(formData.email))
+      errors.email = "Invalid email format";
+    if (!/^\d{10}$/.test(formData.phone))
+      errors.phone = "Phone must be 10 digits";
+    if (new Date(formData.checkIn) < new Date(today))
+      errors.checkIn = "Check-in must be today or later";
+    if (new Date(formData.checkOut) <= new Date(formData.checkIn))
+      errors.checkOut = "Check-out must be after check-in";
+    if (isNaN(formData.roomPrice) || formData.roomPrice <= 0)
+      errors.roomPrice = "Invalid price";
+    if (isNaN(formData.roomCount) || formData.roomCount < 1)
+      errors.roomCount = "Invalid room count";
 
     return Object.keys(errors).length === 0 ? null : errors;
   };
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    
+
     const formErrors = validateForm();
     if (formErrors) {
-      Object.values(formErrors).forEach(error => toast.error(error));
+      Object.values(formErrors).forEach((error) => toast.error(error));
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:4000/api/reservations/${reservationToEdit}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          checkIn: new Date(formData.checkIn),
-          checkOut: new Date(formData.checkOut)
-        }),
-      });
-
-      if (!response.ok) throw new Error('Failed to update reservation');
-
-      const updatedReservation = await response.json();
-      setReservations(prev => 
-        prev.map(res => (res._id === reservationToEdit ? updatedReservation : res))
+      const response = await fetch(
+        `http://localhost:4000/api/reservations/${reservationToEdit}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+            checkIn: new Date(formData.checkIn),
+            checkOut: new Date(formData.checkOut),
+          }),
+        }
       );
 
-      toast.success('Reservation updated successfully!');
+      if (!response.ok) throw new Error("Failed to update reservation");
+
+      const updatedReservation = await response.json();
+      setReservations((prev) =>
+        prev.map((res) =>
+          res._id === reservationToEdit ? updatedReservation : res
+        )
+      );
+
+      toast.success("Reservation updated successfully!");
       closeEditModal();
-      
+
       // Reload the page after successful update
       window.location.reload();
     } catch (error) {
       console.error("Error updating reservation:", error);
-      toast.error('Failed to update reservation.');
+      toast.error("Failed to update reservation.");
     }
   };
 
@@ -148,13 +198,18 @@ const BookedReservations = () => {
     if (!reservationToDelete) return;
 
     try {
-      const response = await fetch(`http://localhost:4000/api/reservations/${reservationToDelete}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `http://localhost:4000/api/reservations/${reservationToDelete}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to delete reservation");
 
-      setReservations(prev => prev.filter(res => res._id !== reservationToDelete));
+      setReservations((prev) =>
+        prev.filter((res) => res._id !== reservationToDelete)
+      );
       toast.success("Reservation deleted successfully!");
     } catch (error) {
       console.error("Error deleting reservation:", error);
@@ -166,21 +221,143 @@ const BookedReservations = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'confirmed':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 border-red-200';
+      case "confirmed":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "cancelled":
+        return "bg-red-100 text-red-800 border-red-200";
       default:
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    }
+  };
+  const myTravelDetails = {
+    destination: "Tokyo, Japan",
+    startDate: "2024-04-15",
+    endDate: "2024-04-22",
+    purpose: "leisure",
+    weather: "Mild with occasional rain, 15-20°C",
+    hotel: {
+      name: "Sakura Garden Hotel",
+      area: "Shinjuku",
+    },
+    travelers: 2,
+  };
+
+  async function generateAndDisplayTips() {
+    try {
+
+      console.log(selectedReservation);
+      
+      const weather = await fetchWeather("Colombo");
+
+      const tips = await getTravelTips(myTravelDetails, weather);
+      console.log(tips);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  const getTravelTips = async (travelDetails, weather) => {
+    try {
+      const prompt = `
+        Generate comprehensive travel tips in bullet point format based on the following details and use given spesific names as more as possible(cities, hotel names , etc) :
+        
+       
+        Weather Forecast: ${weather.forecast}
+        City: ${weather.city}
+        humidity: ${weather.humidity}
+        temperature: ${weather.temperature}
+        windSpeed: ${weather.windSpeed}
+        visibility: ${weather.visibility}
+        
+
+        Travelers: ${travelDetails.travelers} ${
+        travelDetails.travelers > 1 ? "people" : "person"
+      }
+        
+        Provide tips in the following categories:
+        
+        1. Preparation Checklist:
+        - Essential items to pack
+        - Documents needed
+        - Health precautions
+        
+        2. Destination-Specific Advice:
+        - Cultural norms to be aware of
+        - Must-visit places
+        - Local customs
+        
+        3. Weather Considerations:
+        - How to dress appropriately
+        - Activities suited for the forecast
+        - Any weather-related precautions
+        
+        Keep each bullet point concise but informative.
+      `;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: prompt,
+      });
+
+      if (response && response.text) {
+        return response.text;
+      } else {
+        throw new Error("No response text received from the API");
+      }
+    } catch (error) {
+      console.error("Error generating travel tips:", error);
+      return "Could not generate travel tips at this time. Please try again later.";
+    }
+  };
+
+  const API_KEY = "27981ac19354bda01216eb6a960337e8"; // OpenWeatherMap API key
+
+  const fetchWeather = async (city) => {
+    try {
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${API_KEY}`
+      );
+
+      if (!response.ok) throw new Error("City not found");
+
+      const currentWeather = await response.json();
+
+      const forecastResponse = await fetch(
+        `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${API_KEY}`
+      );
+
+      if (!forecastResponse.ok) throw new Error("Forecast data not available");
+
+      const forecastData = await forecastResponse.json();
+
+      const weatherData = {
+        city: currentWeather.name,
+        country: currentWeather.sys.country,
+        temperature: currentWeather.main.temp,
+        condition: currentWeather.weather[0].main,
+        description: currentWeather.weather[0].description,
+        humidity: currentWeather.main.humidity,
+        windSpeed: currentWeather.wind.speed * 3.6, // m/s to km/h
+        pressure: currentWeather.main.pressure, // Atmospheric pressure in hPa
+        visibility: currentWeather.visibility / 1000, // Visibility in km
+        feelsLike: currentWeather.main.feels_like,
+        forecast: forecastData.list,
+      };
+
+      return weatherData;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch weather data");
     }
   };
 
   return (
+    <div>
+      <Navbar/>
+    
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6 mt-20">
           {/* Header Section */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-6">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-6 ">
             <h1 className="text-3xl font-bold text-white">Your Bookings</h1>
             <p className="text-blue-100 mt-2">Manage your hotel reservations</p>
           </div>
@@ -199,34 +376,49 @@ const BookedReservations = () => {
                   {reservations.map((res) => {
                     const nights = calculateNights(res.checkIn, res.checkOut);
                     const statusColor = getStatusColor(res.status);
-                    
+
                     return (
-                      <div key={res._id} className="bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg">
+                      <div
+                        key={res._id}
+                        className="bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg"
+                      >
                         {/* Status Banner */}
-                        <div className={`px-4 py-2 ${statusColor} border-l-4 ${
-                          res.status === "confirmed" ? "border-green-500" :
-                          res.status === "cancelled" ? "border-red-500" : "border-yellow-500"
-                        } flex justify-between items-center`}>
+                        <div
+                          className={`px-4 py-2 ${statusColor} border-l-4 ${
+                            res.status === "confirmed"
+                              ? "border-green-500"
+                              : res.status === "cancelled"
+                              ? "border-red-500"
+                              : "border-yellow-500"
+                          } flex justify-between items-center`}
+                        >
                           <span className="font-medium capitalize">
                             {res.status || "Pending"}
                           </span>
-                          <div className="text-sm">
-                            #{res._id.slice(-6)}
-                          </div>
+                          <div className="text-sm">#{res._id.slice(-6)}</div>
                         </div>
-                        
+
                         {/* Hotel Name */}
-                        <div className="px-6 pt-4 pb-2 border-b">
-                          <h3 className="text-xl font-bold text-gray-800">{res.hotelName || "Hotel Name"}</h3>
+                        <div className="px-6 pt-4 pb-2 border-b flex justify-between">
+                          <h3 className="text-xl font-bold text-gray-800">
+                            {res.hotelName || "Hotel Name"}
+                          </h3>
+                          {/*TODO add a proper icon*/}
+                          <Lightbulb
+                            className="text-yellow-300 drop-shadow-glow-extreme"
+                            onClick={() => openDetailsModal(res)}
+                          />
                         </div>
-                        
+
                         {/* Reservation Details */}
                         <div className="px-6 py-4">
                           {/* Guest Info */}
                           <div className="mb-4">
                             <div className="flex items-center mb-2">
                               <Users className="h-5 w-5 text-blue-500 mr-2" />
-                              <h4 className="font-semibold text-gray-800">{res.name}</h4>
+                              <h4 className="font-semibold text-gray-800">
+                                {res.name}
+                              </h4>
                             </div>
                             <div className="ml-7 text-sm text-gray-600 flex flex-col space-y-1">
                               <div className="flex items-center">
@@ -239,67 +431,85 @@ const BookedReservations = () => {
                               </div>
                             </div>
                           </div>
-                          
+
                           {/* Date Info */}
                           <div className="mb-4 bg-gray-50 rounded-lg p-3">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center">
                                 <Calendar className="h-4 w-4 text-blue-600 mr-2" />
-                                <span className="text-sm font-medium">Check-in</span>
+                                <span className="text-sm font-medium">
+                                  Check-in
+                                </span>
                               </div>
-                              <span className="text-sm">{new Date(res.checkIn).toLocaleDateString()}</span>
+                              <span className="text-sm">
+                                {new Date(res.checkIn).toLocaleDateString()}
+                              </span>
                             </div>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center">
                                 <Calendar className="h-4 w-4 text-indigo-600 mr-2" />
-                                <span className="text-sm font-medium">Check-out</span>
+                                <span className="text-sm font-medium">
+                                  Check-out
+                                </span>
                               </div>
-                              <span className="text-sm">{new Date(res.checkOut).toLocaleDateString()}</span>
+                              <span className="text-sm">
+                                {new Date(res.checkOut).toLocaleDateString()}
+                              </span>
                             </div>
                             <div className="mt-2 pt-2 border-t border-gray-200 flex items-center justify-between">
                               <div className="flex items-center">
                                 <Clock className="h-4 w-4 text-gray-500 mr-2" />
-                                <span className="text-sm font-medium">Duration</span>
+                                <span className="text-sm font-medium">
+                                  Duration
+                                </span>
                               </div>
-                              <span className="text-sm">{nights} {nights === 1 ? 'night' : 'nights'}</span>
+                              <span className="text-sm">
+                                {nights} {nights === 1 ? "night" : "nights"}
+                              </span>
                             </div>
                           </div>
-                          
+
                           {/* Room and Price Info */}
                           <div className="flex justify-between mb-4">
                             <div className="flex items-center">
                               <Home className="h-4 w-4 text-gray-500 mr-2" />
-                              <span className="text-sm font-medium">{res.roomCount || 1} {(res.roomCount || 1) === 1 ? 'Room' : 'Rooms'}</span>
+                              <span className="text-sm font-medium">
+                                {res.roomCount || 1}{" "}
+                                {(res.roomCount || 1) === 1 ? "Room" : "Rooms"}
+                              </span>
                             </div>
                             <div className="flex items-center font-semibold text-gray-800">
                               <DollarSign className="h-4 w-4 text-green-600 mr-1" />
                               <span>Rs {res.roomPrice}</span>
                             </div>
                           </div>
-                          
+
                           {/* Message if any */}
                           {res.message && (
                             <div className="mb-4 bg-blue-50 p-3 rounded-lg">
                               <div className="flex items-start">
                                 <MessageSquare className="h-4 w-4 text-blue-500 mr-2 mt-1" />
-                                <div className="text-sm text-gray-700">{res.message}</div>
+                                <div className="text-sm text-gray-700">
+                                  {res.message}
+                                </div>
                               </div>
                             </div>
                           )}
                         </div>
-                        
+
                         {/* Actions */}
                         <div className="px-6 py-3 bg-gray-50 flex justify-between items-center">
-                          {res.status !== "confirmed" && res.status !== "cancelled" ? (
-                            <button 
-                              onClick={() => openEditModal(res)} 
+                          {res.status !== "confirmed" &&
+                          res.status !== "cancelled" ? (
+                            <button
+                              onClick={() => openEditModal(res)}
                               className="text-blue-600 hover:text-blue-800 flex items-center text-sm font-medium"
                             >
                               <Edit className="h-4 w-4 mr-1" />
                               Edit
                             </button>
                           ) : (
-                            <button 
+                            <button
                               className="text-gray-400 cursor-not-allowed flex items-center text-sm"
                               disabled
                             >
@@ -307,8 +517,8 @@ const BookedReservations = () => {
                               Edit
                             </button>
                           )}
-                          <button 
-                            onClick={() => openDeleteModal(res._id)} 
+                          <button
+                            onClick={() => openDeleteModal(res._id)}
                             className="text-red-600 hover:text-red-800 flex items-center text-sm font-medium"
                           >
                             <Trash2 className="h-4 w-4 mr-1" />
@@ -324,8 +534,12 @@ const BookedReservations = () => {
                   <div className="mx-auto h-16 w-16 text-gray-400">
                     <Calendar className="h-full w-full" />
                   </div>
-                  <h3 className="mt-4 text-lg font-medium text-gray-600">No reservations found</h3>
-                  <p className="mt-2 text-gray-500">You don't have any active bookings at the moment.</p>
+                  <h3 className="mt-4 text-lg font-medium text-gray-600">
+                    No reservations found
+                  </h3>
+                  <p className="mt-2 text-gray-500">
+                    You don't have any active bookings at the moment.
+                  </p>
                 </div>
               )}
             </div>
@@ -515,7 +729,10 @@ const BookedReservations = () => {
               <div className="bg-red-100 p-3 rounded-full mr-4">
                 <X className="h-6 w-6 text-red-600" />
               </div>
-              <p className="text-gray-700">Are you sure you want to delete this reservation? This action cannot be undone.</p>
+              <p className="text-gray-700">
+                Are you sure you want to delete this reservation? This action
+                cannot be undone.
+              </p>
             </div>
             <div className="flex justify-end space-x-4">
               <button
@@ -535,6 +752,129 @@ const BookedReservations = () => {
           </div>
         </div>
       </ReactModal>
+
+      {/* Details Modal */}
+      <ReactModal
+        isOpen={isDetailsModalOpen}
+        onRequestClose={closeDetailsModal}
+        className="bg-white w-full max-w-2xl mx-auto my-10 p-0 rounded-xl shadow-2xl overflow-hidden"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center p-4"
+      >
+        {selectedReservation && (
+          <div>
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-700 px-6 py-4">
+              <h2 className="text-xl font-bold text-white">
+                Reservation Details
+              </h2>
+            </div>
+            <div className="p-6 space-y-4">
+              {/* Header with ID and Status */}
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-sm text-gray-500">
+                  #{selectedReservation._id.slice(-6)}
+                </span>
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                    selectedReservation.status
+                  )}`}
+                >
+                  {selectedReservation.status || "Pending"}
+                </span>
+              </div>
+
+              {/* Guest Information */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-gray-800 mb-2">
+                  Guest Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center">
+                    <Users className="h-4 w-4 text-gray-500 mr-2" />
+                    <span>{selectedReservation.name}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Mail className="h-4 w-4 text-gray-500 mr-2" />
+                    <span>{selectedReservation.email}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Phone className="h-4 w-4 text-gray-500 mr-2" />
+                    <span>{selectedReservation.phone}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Booking Details */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-gray-800 mb-2">
+                  Booking Details
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center">
+                    <Calendar className="h-4 w-4 text-blue-500 mr-2" />
+                    <span>
+                      Check-in:{" "}
+                      {new Date(
+                        selectedReservation.checkIn
+                      ).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <Calendar className="h-4 w-4 text-indigo-500 mr-2" />
+                    <span>
+                      Check-out:{" "}
+                      {new Date(
+                        selectedReservation.checkOut
+                      ).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <Home className="h-4 w-4 text-gray-500 mr-2" />
+                    <span>Rooms: {selectedReservation.roomCount || 1}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <DollarSign className="h-4 w-4 text-green-500 mr-2" />
+                    <span>Price: Rs {selectedReservation.roomPrice}</span>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <div className="flex items-center">
+                    <Clock className="h-4 w-4 text-gray-500 mr-2" />
+                    <span>
+                      Duration:{" "}
+                      {calculateNights(
+                        selectedReservation.checkIn,
+                        selectedReservation.checkOut
+                      )}{" "}
+                      nights
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Special Requests */}
+              {selectedReservation.message && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-800 mb-2">
+                    Special Requests
+                  </h3>
+                  <p className="text-gray-700">{selectedReservation.message}</p>
+                </div>
+              )}
+
+              {/* Close Button */}
+              <div className="flex justify-end pt-4">
+                <button
+                  onClick={closeDetailsModal}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </ReactModal>
+    </div>
     </div>
   );
 };

@@ -25,6 +25,7 @@ import { SearchContext } from '../../context/SearchContext.jsx';
 import fallback from "./image/araliya.jpg";
 
 import WeatherApp from '../../components/weatherapp/WeatherApp.jsx';
+import Navbar from '../../components/Navbar.jsx';
 
 const Hotel = () => {
   const location = useLocation();
@@ -151,6 +152,9 @@ const visibleReviews = reviews.slice(0, visibleCount);
   }
 
   return (
+    <div>
+      <Navbar />
+    
     <div className="bg-gray-50 min-h-screen">
       <Header type="list" />
       
@@ -580,6 +584,8 @@ const visibleReviews = reviews.slice(0, visibleCount);
       <Footer />
       
       {openModal && <Reserve setOpen={setOpenModal} hotelId={id}/>}
+    </div>
+
     </div>
   );
 };

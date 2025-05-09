@@ -18,6 +18,7 @@ import {
   faMapMarkerAlt,
   faSpinner
 } from "@fortawesome/free-solid-svg-icons";
+import Navbar from '../../components/Navbar.jsx';
 
 const List = () => {
   const location = useLocation();
@@ -104,6 +105,9 @@ const List = () => {
   };
 
   return (
+    <div>
+      <Navbar />
+    
     <div className="bg-gray-50 min-h-screen">
       <Header type="list" />
       
@@ -389,6 +393,7 @@ const List = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }
