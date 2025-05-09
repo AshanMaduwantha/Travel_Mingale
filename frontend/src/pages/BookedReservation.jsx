@@ -17,6 +17,10 @@ import {
   DollarSign,
   Info,
   Lightbulb,
+  Compass,
+  MapPin,
+  Shield,
+  CloudSun,
 } from "lucide-react";
 import { GoogleGenAI } from "@google/genai";
 import Navbar from "../components/Navbar";
@@ -283,7 +287,7 @@ const BookedReservations = () => {
 
         Travelers: ${travelDetails.travelers} ${travelDetails.travelers > 1 ? "people" : "person"
         }
-        use above details to generate tips. but keep it between 5-10 tips. call the user by the first name of the traveler.
+        use above details to generate tips. but keep it between 10-15 tips. call the user by the first name of the traveler.
 
         Provide tips in the following categories no need additional details before or after in the response:
 
@@ -292,18 +296,35 @@ const BookedReservations = () => {
         
         1. Preparation Checklist:
         - Essential items to pack
-        - Documents needed
+        - Essential documents
         - Health precautions
-        
-        2. Destination-Specific Advice:
-        - Cultural norms to be aware of
-        - Must-visit places
-        - Local customs
-        
-        3. Weather Considerations:
+
+        2. Weather Considerations:
         - How to dress appropriately
         - Activities suited for the forecast
         - Any weather-related precautions
+
+        3. Destination-Specific Advice:
+        - Cultural norms to be aware of
+        - Local food and drink recommendations
+        - Local customs and etiquette
+
+        4. Recommended Nearby Places:
+        - Must-visit landmarks and attractions
+        - Natural spots, cultural sites, or hidden gems
+        - Walking-distance or short-drive experiences
+
+        5. Safety and Health Tips:
+        - Area-specific safety notes
+        - Adventure precautions
+        - Emergency access
+
+        6. Ideal Travel Timing:
+        - Best months or seasons to visit
+        - Crowds and pricing trends
+        - Local festivals or events
+
+        
         
         Keep each bullet point concise but informative.
       `;
@@ -492,7 +513,7 @@ const BookedReservations = () => {
                                 </span>
                               </div>
                               <div className="flex items-center font-semibold text-gray-800">
-                                <DollarSign className="h-4 w-4 text-green-600 mr-1" />
+                                
                                 <span>Rs {res.roomPrice}</span>
                               </div>
                             </div>
@@ -802,10 +823,23 @@ const BookedReservations = () => {
                       </ul>
                     </div>
 
+                    {/* Weather Considerations */}
+                    <div className="bg-green-50 rounded-lg p-4">
+                      <h3 className="font-bold text-green-800 flex items-center mb-2">
+                        <CloudSun  className="h-5 w-5 mr-2" />
+                        Weather Considerations
+                      </h3>
+                      <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                        {travelTips["Weather Considerations"]?.map((tip, index) => (
+                          <li key={index} className="text-sm md:text-base">{tip}</li>
+                        ))}
+                      </ul>
+                    </div>
+
                     {/* Destination-Specific Advice */}
                     <div className="bg-purple-50 rounded-lg p-4">
                       <h3 className="font-bold text-purple-800 flex items-center mb-2">
-                        <Info className="h-5 w-5 mr-2" />
+                        <MapPin  className="h-5 w-5 mr-2" />
                         Destination-Specific Advice
                       </h3>
                       <ul className="list-disc pl-5 space-y-2 text-gray-700">
@@ -815,18 +849,45 @@ const BookedReservations = () => {
                       </ul>
                     </div>
 
-                    {/* Weather Considerations */}
-                    <div className="bg-green-50 rounded-lg p-4">
-                      <h3 className="font-bold text-green-800 flex items-center mb-2">
-                        <Lightbulb className="h-5 w-5 mr-2" />
-                        Weather Considerations
+                    {/* Recommended Nearby Places */}
+                    <div className="bg-yellow-50 rounded-lg p-4">
+                      <h3 className="font-bold text-yellow-800 flex items-center mb-2">
+                        <Compass className="h-5 w-5 mr-2" />
+                        Recommended Nearby Places
                       </h3>
                       <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                        {travelTips["Weather Considerations"]?.map((tip, index) => (
+                        {travelTips["Recommended Nearby Places"]?.map((tip, index) => (
                           <li key={index} className="text-sm md:text-base">{tip}</li>
                         ))}
                       </ul>
                     </div>
+
+                    {/* Safety and Health Tips */}
+                    <div className="bg-red-50 rounded-lg p-4">
+                      <h3 className="font-bold text-red-800 flex items-center mb-2">
+                        <Shield  className="h-5 w-5 mr-2" />
+                        Safety and Health Tips
+                      </h3>
+                      <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                        {travelTips["Safety and Health Tips"]?.map((tip, index) => (
+                          <li key={index} className="text-sm md:text-base">{tip}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Ideal Travel Timing */}
+                    <div className="bg-indigo-50 rounded-lg p-4">
+                      <h3 className="font-bold text-indigo-800 flex items-center mb-2">
+                        <Info className="h-5 w-5 mr-2" />
+                        Ideal Travel Timing
+                      </h3>
+                      <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                        {travelTips["Ideal Travel Timing"]?.map((tip, index) => (
+                          <li key={index} className="text-sm md:text-base">{tip}</li>
+                        ))}
+                      </ul>
+                    </div>
+
                   </>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 h-full">
