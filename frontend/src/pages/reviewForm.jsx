@@ -11,12 +11,6 @@ const ReviewForm = () => {
   
   const [hotel, setHotel] = useState({
     id: hotelIdFromUrl || "661b41a95c45fcff7c5530a2", // Use the URL param or fallback to default
-    name: "Seaside Escape Resort",
-    price: "$250 per night",
-    description: "Enjoy a peaceful stay by the ocean with luxurious rooms and stunning views.",
-    image: [
-      "https://images.unsplash.com/photo-1501117716987-c8e8b8d96557?auto=format&fit=crop&w=1400&q=80"
-    ],
   });
 
   const [newReview, setNewReview] = useState({ name: "", rating: 0, comment: "" });
@@ -31,33 +25,38 @@ const ReviewForm = () => {
   const [deleteMessage, setDeleteMessage] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState("");
   const [editSuccess, setEditSuccess] = useState("");
+  const [hotelDetails, setHotelDetails] = useState("");
+  //   name: "",
+  //   price: "",
+  //   description: "",
+  //   image: []
+  // });
 
   const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
 
-  // Optional: Fetch hotel details based on the hotelId
+  // Fetch hotel details based on the hotelId
+  useEffect(() => {
+    const fetchHotelDetails = async () => {
+      try {
+        const res = await axios.get(`http://localhost:4000/api/hotels/${hotel.id}`);
+        setHotelDetails({
+          name: res.data.name,
+          price: res.data.price,
+          description: res.data.description,
+          image: res.data.images
+        });
+      } catch (err) {
+        console.error("Error fetching hotel details:", err);
+        // Set default values if API call fails
+ 
+      }
+    };
+    
+    fetchHotelDetails();
+  }, [hotel.id]);
+
   useEffect(() => {
     if (hotelIdFromUrl) {
-      // You can add an API call here to fetch hotel details
-      // For example:
-      /*
-      const fetchHotelDetails = async () => {
-        try {
-          const res = await axios.get(`http://localhost:4000/api/hotels/${hotelIdFromUrl}`);
-          setHotel({
-            id: res.data._id,
-            name: res.data.name,
-            price: res.data.price,
-            description: res.data.description,
-            image: res.data.images,
-          });
-        } catch (err) {
-          console.error("Error fetching hotel details:", err);
-        }
-      };
-      fetchHotelDetails();
-      */
-      
-      // For now, we'll just update the ID in the existing hotel object
       setHotel(prevHotel => ({
         ...prevHotel,
         id: hotelIdFromUrl
@@ -202,15 +201,17 @@ const ReviewForm = () => {
     new Date(current.createdAt) > new Date(latest?.createdAt || 0) ? current : latest
   , reviews[0] || {});
 
-  const handleMostReviewsClick = () => navigate("/reviews");
+  const handleMostReviewsClick = () => navigate("/");
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-50">
       <div className="bg-white shadow-lg rounded-lg overflow-hidden p-6">
-        <img src={hotel.image[0]} alt={hotel.name} className="w-full h-64 object-cover rounded-lg" />
-        <h1 className="text-3xl font-bold mt-4 text-gray-800">{hotel.name}</h1>
-        <p className="text-xl font-semibold text-blue-600 my-2">{hotel.price}</p>
-        <p className="text-gray-600 mb-6">{hotel.description}</p>
+        {hotelDetails.image && hotelDetails.image[0] && (
+          <img src={hotelDetails.image[0]} alt={hotelDetails.name} className="w-full h-64 object-cover rounded-lg" />
+        )}
+        <h1 className="text-3xl font-bold mt-4 text-gray-800">{hotelDetails.name}</h1>
+        <p className="text-xl font-semibold text-blue-600 my-2">{hotelDetails.price}</p>
+        <p className="text-gray-600 mb-6">{hotelDetails.description}</p>
 
         <h3 className="text-2xl font-semibold text-gray-800 mb-4">Reviews</h3>
         {deleteMessage && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">{deleteMessage}</div>}
@@ -259,7 +260,7 @@ const ReviewForm = () => {
           <button 
             className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded" 
             onClick={handleMostReviewsClick}>
-            Most Reviews
+            Back To Home
           </button>
         </div>
 
