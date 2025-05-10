@@ -581,7 +581,7 @@ const BookedReservations = () => {
           </div>
         </div>
 
-        <ToastContainer position="bottom-right" />
+        <ToastContainer position="top-right" />
 
         {/* Edit Modal */}
         <ReactModal
