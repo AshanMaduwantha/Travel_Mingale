@@ -3,6 +3,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { Trash2, AlertTriangle } from "lucide-react";
 import "react-toastify/dist/ReactToastify.css";
 
 const AdminReview = () => {
@@ -10,6 +11,8 @@ const AdminReview = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
     fetchReviews();
@@ -27,16 +30,28 @@ const AdminReview = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this review?")) return;
+  const openDeleteModal = (id) => {
+    setDeleteId(id);
+    setShowDeleteModal(true);
+  };
 
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setDeleteId(null);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    
     try {
-      await axios.delete(`http://localhost:4000/api/reviews/${id}`);
-      setReviews(reviews.filter((review) => review._id !== id));
+      await axios.delete(`http://localhost:4000/api/reviews/${deleteId}`);
+      setReviews(reviews.filter((review) => review._id !== deleteId));
       toast.success("Deleted successfully!");
+      closeDeleteModal();
     } catch (err) {
       console.error("Error deleting review:", err);
       toast.error("Failed to delete review.");
+      closeDeleteModal();
     }
   };
 
@@ -139,10 +154,11 @@ const AdminReview = () => {
                   </td>
                   <td className="px-4 py-2">
                     <button
-                      onClick={() => handleDelete(review._id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                      onClick={() => openDeleteModal(review._id)}
+                      className=" text-red-600 p-2 rounded hover:text-blue-800 transition flex items-center justify-center"
+                      title="Delete"
                     >
-                      Delete
+                      <Trash2 size={16} />
                     </button>
                   </td>
                 </tr>
@@ -153,8 +169,57 @@ const AdminReview = () => {
       )}
 
       <ToastContainer />
+
+{/* Delete Confirmation Modal */}
+{showDeleteModal && (
+  <div className="fixed inset-0 bg-black opacity-100 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
+      {/* Header */}
+      <div className="bg-red-600 text-white px-6 py-4">
+        <h3 className="text-xl font-bold">Confirm Deletion</h3>
+      </div>
+      
+      {/* Body */}
+      <div className="p-6">
+        <div className="flex mb-4">
+          <div className="bg-red-100 rounded-full p-3 mr-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-gray-700">
+              Are you sure you want to delete this review? This action cannot be undone.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      {/* Footer */}
+      <div className="px-6 py-4 bg-gray-50 flex justify-end space-x-2">
+        <button
+          onClick={closeDeleteModal}
+          className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleDelete}
+          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition flex items-center"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Delete
+        </button>
+        
+       
+              </div>
+            </div>
+          </div>
+        
+      )}
     </div>
   );
-};
-
+}
 export default AdminReview;
